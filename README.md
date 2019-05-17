@@ -28,3 +28,13 @@ fast_crawl_engine.NewFastCrawlEngine(FastCrawlEngineParams{
 
 下一步版本
 
+### 相关项目
+
+* chrome浏览器内核
+* https://github.com/chromedp/chromedp
+* https://github.com/benmanns/goworker
+* https://github.com/hsw409328/gofunc
+*
+
+
+
