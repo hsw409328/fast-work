@@ -1,0 +1,5 @@
+2019/05/14 17:57:13 dns_result.go:26: [92m[INFO][0m : {ns2.baidu.com [220.181.33.31]  true A}
+2019/05/14 17:57:13 dns_result.go:26: [92m[INFO][0m : {ns1.baidu.com [202.108.22.220]  true A}
+2019/05/14 17:57:13 dns_result.go:26: [92m[INFO][0m : {www.baidu.com [61.135.169.125 61.135.169.121]  true A}
+2019/05/14 17:57:13 dns_result.go:26: [92m[INFO][0m : {mail.baidu.com [111.202.115.87]  true A}
+2019/05/14 17:57:16 dns_result.go:26: [92m[INFO][0m : {www.weibo.com [123.125.104.197 123.125.104.26]  true A}
