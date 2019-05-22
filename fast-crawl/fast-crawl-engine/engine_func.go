@@ -1,12 +1,12 @@
 /**
- * Author: haoshuaiwei 
- * Date: 2019-05-15 11:26 
+ * Author: haoshuaiwei
+ * Date: 2019-05-15 11:26
  */
 
 package fast_crawl_engine
 
 import (
-	"gofunc"
+	"github.com/hsw409328/gofunc"
 	"strings"
 )
 

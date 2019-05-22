@@ -1,6 +1,6 @@
 /**
- * Author: haoshuaiwei 
- * Date: 2019-05-15 11:26 
+ * Author: haoshuaiwei
+ * Date: 2019-05-15 11:26
  */
 
 package fast_crawl_engine
@@ -8,6 +8,7 @@ package fast_crawl_engine
 import (
 	"context"
 	"encoding/json"
+	"fast-work/fast-crawl/filter"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/cdproto"
@@ -69,12 +70,15 @@ type FastCrawlEngineParams struct {
 
 type FastCrawlEngine struct {
 	params *FastCrawlEngineParams
+	filter *filter.BloomFilter
 }
 
 // 外部实例
 func NewFastCrawlEngine(params FastCrawlEngineParams) *FastCrawlEngine {
+	seeds := []uint{7, 11, 13, 31, 37, 61}
 	return &FastCrawlEngine{
 		params: &params,
+		filter: filter.NewBloomFilter(2<<24, seeds, filter.NewRedisSet(2<<24), filter.DefaultHash),
 	}
 }
 
@@ -131,16 +135,19 @@ func (c *FastCrawlEngine) Start() {
 				k = c.params.BaseDomain + gofunc.ConnectFirstWord(k, "/")
 			}
 
-			resultObject.Add(FastCrawlResultData{
-				BaseDomain:   c.params.BaseDomain,
-				UrlStr:       k,
-				Method:       gofunc.InterfaceToString(value),
-				Title:        title,
-				DeepLevel:    c.params.MinDeepLevel,
-				MaxDeepLevel: c.params.MaxDeepLevel,
-				Host:         c.params.Host,
-				Cookies:      c.params.Cookies,
-			})
+			if !c.filter.Contains(k) {
+				resultObject.Add(FastCrawlResultData{
+					BaseDomain:   c.params.BaseDomain,
+					UrlStr:       k,
+					Method:       gofunc.InterfaceToString(value),
+					Title:        title,
+					DeepLevel:    c.params.MinDeepLevel,
+					MaxDeepLevel: c.params.MaxDeepLevel,
+					Host:         c.params.Host,
+					Cookies:      c.params.Cookies,
+				})
+				c.filter.Add(k)
+			}
 			return true
 		})
 	}

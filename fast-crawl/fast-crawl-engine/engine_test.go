@@ -1,6 +1,6 @@
 /**
- * Author: haoshuaiwei 
- * Date: 2019-05-15 11:26 
+ * Author: haoshuaiwei
+ * Date: 2019-05-15 11:26
  */
 
 package fast_crawl_engine
@@ -11,9 +11,9 @@ import (
 
 func TestFastCrawlEngine_Start(t *testing.T) {
 	NewFastCrawlEngine(FastCrawlEngineParams{
-		BaseDomain:   "http://www.51hsw.com",
-		DomainStr:    "http://www.51hsw.com",
+		BaseDomain:   "http://security.jd.com",
+		DomainStr:    "http://security.jd.com",
 		MinDeepLevel: 1,
-		MaxDeepLevel: 2,
+		MaxDeepLevel: 3,
 	}).Start()
 }
