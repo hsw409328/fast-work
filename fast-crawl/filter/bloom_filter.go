@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+var (
+	fastCrawlKey = "fastCrawlKey"
+)
+
 type BloomFilter struct {
 	size     uint
 	seeds    []uint
@@ -71,14 +75,12 @@ func NewRedisSet(length uint) *RedisSet {
 		DB:       0,  // use default DB
 	})
 
-	client.FlushDB()
-
 	return &RedisSet{
 		length,
 		client,
-		"key",
+		fastCrawlKey,
 		NewSet(),
-		10000,
+		1,
 	}
 }
 
@@ -90,7 +92,7 @@ func (r *RedisSet) SetAll(values []interface{}) {
 	r.buffer.Add(values...)
 	if r.buffer.Size() >= r.bufferMax {
 		pipe := r.client.Pipeline()
-		pipe.SAdd(r.key, r.buffer.ToSlice())
+		pipe.SAdd(r.key, r.buffer.ToSlice()...)
 		_, err := pipe.Exec()
 		if err != nil {
 			log.Println(err)
