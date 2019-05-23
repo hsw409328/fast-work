@@ -49,7 +49,6 @@ func (c *FastCrawlResult) PrintString() string {
 
 func (c *FastCrawlResult) SendTask() {
 	for _, v := range c.result {
-		log.Println(v.DeepLevel + 1,v.UrlStr)
 		goworker.Enqueue(&goworker.Job{
 			Queue: "crawl",
 			Payload: goworker.Payload{

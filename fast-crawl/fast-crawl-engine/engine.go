@@ -101,6 +101,7 @@ func (c *FastCrawlEngine) Start() {
 		if err != nil {
 			log.Println(err)
 		}
+
 		title := doc.Find("title").Text()
 		doc.Find("a").Each(func(i int, selection *goquery.Selection) {
 			urlStr, _ := selection.Attr("href")
@@ -121,11 +122,23 @@ func (c *FastCrawlEngine) Start() {
 		})
 
 		// 添加的本次获取的结果集
+
+		//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
+		tmpBaseDomain := strings.Replace(c.params.BaseDomain, "http://", "/", -1)
+		tmpBaseDomain = strings.Replace(tmpBaseDomain, "https://", "/", -1)
+
 		resultMap.Range(func(key, value interface{}) bool {
 			k := gofunc.InterfaceToString(key)
-			//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
-			tmpBaseDomain := strings.Replace(c.params.BaseDomain, "http://", "/", -1)
-			tmpBaseDomain = strings.Replace(tmpBaseDomain, "https://", "/", -1)
+
+			//判断k是否在基础域名内，防止出界
+			if !gofunc.Strpos(k, tmpBaseDomain) {
+				//判断有没有http://或者https:// 防止 /xxx/xx 没有域名这类的丢失
+				if gofunc.Strpos(k, "http://") || gofunc.Strpos(k, "https://") {
+					return true
+				}
+				//还有一种情况 //xxx.xx.com/xx.html
+			}
+
 			// 判断连接是否完整
 			if !gofunc.Strpos(k, tmpBaseDomain) {
 				//判断域名最后一个是否有 "/" and 判断原始连接第一个是否有 "/" 进行连接
@@ -151,6 +164,7 @@ func (c *FastCrawlEngine) Start() {
 			return true
 		})
 	}
+
 	//调用解析，添加到任务列表
 	parseHtml(htmlStr)
 

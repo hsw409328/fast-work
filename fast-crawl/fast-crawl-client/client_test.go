@@ -17,16 +17,16 @@ func TestClient_Baidu(t *testing.T) {
 		Payload: goworker.Payload{
 			Class: "Crawl",
 			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
-				BaseDomain:   "http://i.baidu.com",
-				DomainStr:    "http://i.baidu.com",
+				BaseDomain:   "http://news.baidu.com",
+				DomainStr:    "http://news.baidu.com",
 				MinDeepLevel: 1,
 				MaxDeepLevel: 2,
-				Cookies: &fast_crawl_engine.FastCrawlCookies{
-					Value:  "请使用自己的百度cookie",
-					Domain: ".baidu.com",
-					Path:   "/",
-				},
-				//Cookies: nil,
+				//Cookies: &fast_crawl_engine.FastCrawlCookies{
+				//	Value:  "请使用自己的百度cookie",
+				//	Domain: ".baidu.com",
+				//	Path:   "/",
+				//},
+				Cookies: nil,
 				//Host: "127.0.0.1",
 			}},
 		},

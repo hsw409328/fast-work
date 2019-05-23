@@ -14,6 +14,6 @@ func TestFastCrawlEngine_Start(t *testing.T) {
 		BaseDomain:   "http://security.jd.com",
 		DomainStr:    "http://security.jd.com",
 		MinDeepLevel: 1,
-		MaxDeepLevel: 3,
+		MaxDeepLevel: 1,
 	}).Start()
 }

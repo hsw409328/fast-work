@@ -6,10 +6,12 @@
 package main
 
 import (
+	"github.com/hsw409328/gofunc"
 	"log"
-	"runtime"
 )
 
 func main()  {
-	log.Println(runtime.NumCPU())
+	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","/news.baidu.com"))
+	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","http://"))
+	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","https://"))
 }
