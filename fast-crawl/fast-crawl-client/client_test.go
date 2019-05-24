@@ -44,11 +44,11 @@ func TestClient_Taobao(t *testing.T) {
 				DomainStr:    "https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm",
 				MinDeepLevel: 1,
 				MaxDeepLevel: 1,
-				Cookies: &fast_crawl_engine.FastCrawlCookies{
-					Value:  "请使用自己的淘宝COOKIE",
-					Domain: ".taobao.com",
-					Path:   "/",
-				},
+				//Cookies: &fast_crawl_engine.FastCrawlCookies{
+				//	Value:  "请使用自己的淘宝COOKIE",
+				//	Domain: ".taobao.com",
+				//	Path:   "/",
+				//},
 			}},
 		},
 	})
@@ -61,15 +61,15 @@ func TestClient_QQ(t *testing.T) {
 		Payload: goworker.Payload{
 			Class: "Crawl",
 			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
-				BaseDomain:   "https://news.qq.com/",
-				DomainStr:    "https://news.qq.com/",
+				BaseDomain:   "https://news.qq.com",
+				DomainStr:    "https://news.qq.com",
 				MinDeepLevel: 1,
-				MaxDeepLevel: 1,
-				Cookies: &fast_crawl_engine.FastCrawlCookies{
-					Value:  "请使用自己的淘宝COOKIE",
-					Domain: ".taobao.com",
-					Path:   "/",
-				},
+				MaxDeepLevel: 2,
+				//Cookies: &fast_crawl_engine.FastCrawlCookies{
+				//	Value:  "请使用自己的淘宝COOKIE",
+				//	Domain: ".taobao.com",
+				//	Path:   "/",
+				//},
 			}},
 		},
 	})

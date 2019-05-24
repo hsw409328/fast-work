@@ -112,8 +112,10 @@ func (c *FastCrawlEngine) Start() {
 	var jsInterface interface{}
 	err := c.initRender(&htmlStr, &jsInterface, resultMap)
 	if err != nil {
-		log.Println(err)
-		log.Println(c.params.DomainStr)
+		if err.Error() == "waited too long for page targets to show up" {
+			log.Println(err.Error())
+			return
+		}
 	}
 
 	//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
@@ -165,7 +167,7 @@ func (c *FastCrawlEngine) Start() {
 				return true
 			}
 			if parseUrl.Host == "" {
-				if gofunc.Strpos(k, "data:image") {
+				if gofunc.Strpos(k, "data:image") || gofunc.Strpos(k, "data:application") {
 					return true
 				}
 				//没有域名 3\4 情况

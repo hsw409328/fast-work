@@ -48,7 +48,7 @@ func init() {
 		Queues:         []string{goWorkerQueueName},
 		UseNumber:      true,
 		ExitOnComplete: false,
-		Concurrency:    runtime.NumCPU(),
+		Concurrency:    runtime.NumCPU() / 2,
 		Namespace:      goWorkerNamespace,
 		Interval:       5.0,
 	}
