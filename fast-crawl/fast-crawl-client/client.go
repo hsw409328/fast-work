@@ -49,7 +49,7 @@ func init() {
 		Queues:         []string{goWorkerQueueName},
 		UseNumber:      true,
 		ExitOnComplete: false,
-		Concurrency:    runtime.NumCPU() * 2,
+		Concurrency:    runtime.NumCPU(),
 		Namespace:      goWorkerNamespace,
 		Interval:       5.0,
 	}
@@ -58,6 +58,7 @@ func init() {
 }
 
 func crawl(queue string, args ...interface{}) error {
+	log.Println("队列名称【", queue, "】--------开始执行---------")
 	var fastCrawlParams fast_crawl_engine.FastCrawlEngineParams
 	for _, v := range args {
 		by, err := json.Marshal(v)

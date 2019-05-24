@@ -11,7 +11,6 @@ import (
 )
 
 func main()  {
-	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","/news.baidu.com"))
-	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","http://"))
-	log.Println(gofunc.Strpos("//news-bos.cdn.bcebos.com/mvideo/baidu_news_protocol.html","https://"))
+	log.Println(gofunc.Strpos("//www.jd.com/phb/key_737d01ea26d1df7bfe1.html","//www.jd.com"))
+	log.Println("http:"+"//www.jd.com/phb/key_737d01ea26d1df7bfe1.html")
 }

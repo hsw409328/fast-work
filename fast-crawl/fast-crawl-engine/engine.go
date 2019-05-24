@@ -34,16 +34,32 @@ var (
                		return false
            		};
            		window.history.back = function(args) {
-               		console.log(args)
+               		return ;
            		};
            		window.history.forward = function(args) {
-               		console.log(args)
+               		return
            		};
+				window.open = function (open) {
+    				return function (url, name, features) {
+        			// set name if missing here
+        			name = name || "default_window_name";
+        			var xmlhttp = new XMLHttpRequest();
+        			xmlhttp.open("GET",url,true);
+        			xmlhttp.send();
+   					};
+				}(window.open);
 				var f = function(){
 					var eles = document.getElementsByTagName('*');
 					for (x in eles) {
 						elm = eles[x];
-						if(typeof elm.click !== "undefined"){elm.click();}
+						elmHtml = elm.innerHTML;
+						if(typeof(elmHtml)!= "undefined"){
+							elmHtml = elmHtml.trim();
+							if (elmHtml.indexOf("<a")==0 && elmHtml.indexOf("target")!=-1 && elmHtml.indexOf("blank")!=-1){
+								continue;
+							}
+							if(typeof elm.click !== "undefined"){elm.click();}
+						}
 					}
 				}
 				f();
@@ -93,7 +109,11 @@ func (c *FastCrawlEngine) Start() {
 
 	var htmlStr string
 	var jsInterface interface{}
-	c.initRender(&htmlStr, &jsInterface, &resultMap)
+	err := c.initRender(&htmlStr, &jsInterface, &resultMap)
+	if err != nil {
+		log.Println(err)
+		log.Println(c.params.DomainStr)
+	}
 
 	//解析需要的URL连接
 	var parseHtml = func(htmlStr string) {
@@ -126,6 +146,7 @@ func (c *FastCrawlEngine) Start() {
 		//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
 		tmpBaseDomain := strings.Replace(c.params.BaseDomain, "http://", "/", -1)
 		tmpBaseDomain = strings.Replace(tmpBaseDomain, "https://", "/", -1)
+		tmpEmptyDomain := strings.Replace(tmpBaseDomain, "/", "", -1)
 
 		resultMap.Range(func(key, value interface{}) bool {
 			k := gofunc.InterfaceToString(key)
@@ -137,6 +158,18 @@ func (c *FastCrawlEngine) Start() {
 					return true
 				}
 				//还有一种情况 //xxx.xx.com/xx.html
+				if !gofunc.Strpos(k, "//"+tmpEmptyDomain) {
+					return true
+				} else {
+					k = "http:" + k
+				}
+			}
+
+			//还有一种情况 //xxx.xx.com/xx.html 判断是否存在http:
+			if !gofunc.Strpos(k, "http:") && !gofunc.Strpos(k, "https:") {
+				if gofunc.Strpos(k, "//"+tmpEmptyDomain) {
+					k = "http:" + k
+				}
 			}
 
 			// 判断连接是否完整
