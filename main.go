@@ -6,11 +6,17 @@
 package main
 
 import (
-	"github.com/hsw409328/gofunc"
 	"log"
+	"net/url"
 )
 
 func main()  {
-	log.Println(gofunc.Strpos("//www.jd.com/phb/key_737d01ea26d1df7bfe1.html","//www.jd.com"))
+	urlParse,err := url.Parse("//a.a.com?r=http://a.a.com/asasdf")
+	log.Println(err)
+	if err!=nil{
+		log.Println(err)
+	}
+	log.Println(urlParse.Host)
+
 	log.Println("http:"+"//www.jd.com/phb/key_737d01ea26d1df7bfe1.html")
 }

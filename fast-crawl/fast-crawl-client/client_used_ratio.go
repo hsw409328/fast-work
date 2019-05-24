@@ -11,7 +11,6 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
-	"log"
 	"runtime"
 	"time"
 )
@@ -82,7 +81,9 @@ func MonitorClient() {
 				clientLog.Error(err)
 			}
 			result := fast_drive.RedisDriver.HSet("ClientInfo", hostInfo.Hostname, saveResult)
-			log.Println(result)
+			if result.Err() != nil {
+				clientLog.Error(err)
+			}
 			time.Sleep(time.Second * 10)
 		}
 	}()

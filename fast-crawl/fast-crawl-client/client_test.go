@@ -17,10 +17,10 @@ func TestClient_Baidu(t *testing.T) {
 		Payload: goworker.Payload{
 			Class: "Crawl",
 			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
-				BaseDomain:   "http://security.jd.com",
-				DomainStr:    "http://security.jd.com",
+				BaseDomain:   "http://www.baidu.com",
+				DomainStr:    "http://www.baidu.com",
 				MinDeepLevel: 1,
-				MaxDeepLevel: 4,
+				MaxDeepLevel: 2,
 				//Cookies: &fast_crawl_engine.FastCrawlCookies{
 				//	Value:  "请使用自己的百度cookie",
 				//	Domain: ".baidu.com",
@@ -42,6 +42,27 @@ func TestClient_Taobao(t *testing.T) {
 			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
 				BaseDomain:   "https://buyertrade.taobao.com",
 				DomainStr:    "https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm",
+				MinDeepLevel: 1,
+				MaxDeepLevel: 1,
+				Cookies: &fast_crawl_engine.FastCrawlCookies{
+					Value:  "请使用自己的淘宝COOKIE",
+					Domain: ".taobao.com",
+					Path:   "/",
+				},
+			}},
+		},
+	})
+	Client()
+}
+
+func TestClient_QQ(t *testing.T) {
+	goworker.Enqueue(&goworker.Job{
+		Queue: "crawl",
+		Payload: goworker.Payload{
+			Class: "Crawl",
+			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
+				BaseDomain:   "https://news.qq.com/",
+				DomainStr:    "https://news.qq.com/",
 				MinDeepLevel: 1,
 				MaxDeepLevel: 1,
 				Cookies: &fast_crawl_engine.FastCrawlCookies{

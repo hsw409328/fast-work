@@ -42,14 +42,13 @@ func (c *FastCrawlResult) All() []*FastCrawlResultData {
 func (c *FastCrawlResult) PrintString() string {
 	for _, v := range c.result {
 		log.Println("【深度】：", v.DeepLevel, "  【请求】：", v.UrlStr)
-		log.Println()
 	}
 	return ""
 }
 
 func (c *FastCrawlResult) SendTask() {
 	for _, v := range c.result {
-		goworker.Enqueue(&goworker.Job{
+		err := goworker.Enqueue(&goworker.Job{
 			Queue: "crawl",
 			Payload: goworker.Payload{
 				Class: "Crawl",
@@ -63,6 +62,9 @@ func (c *FastCrawlResult) SendTask() {
 				}},
 			},
 		})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 }

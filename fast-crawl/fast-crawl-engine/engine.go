@@ -16,6 +16,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/hsw409328/gofunc"
 	"log"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -104,16 +105,20 @@ func (c *FastCrawlEngine) Start() {
 		return
 	}
 
-	resultMap := sync.Map{}
+	resultMap := &sync.Map{}
 	resultObject := NewFastCrawlResult()
 
 	var htmlStr string
 	var jsInterface interface{}
-	err := c.initRender(&htmlStr, &jsInterface, &resultMap)
+	err := c.initRender(&htmlStr, &jsInterface, resultMap)
 	if err != nil {
 		log.Println(err)
 		log.Println(c.params.DomainStr)
 	}
+
+	//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
+	tmpBaseDomain := strings.Replace(c.params.BaseDomain, "http://", "", -1)
+	tmpBaseDomain = strings.Replace(tmpBaseDomain, "https://", "", -1)
 
 	//解析需要的URL连接
 	var parseHtml = func(htmlStr string) {
@@ -142,43 +147,34 @@ func (c *FastCrawlEngine) Start() {
 		})
 
 		// 添加的本次获取的结果集
-
-		//替换http:// 和 https:// 防止判断完整性错误，以及 域名的子域名，例如：i.xxx.com和a.i.xxx.com
-		tmpBaseDomain := strings.Replace(c.params.BaseDomain, "http://", "/", -1)
-		tmpBaseDomain = strings.Replace(tmpBaseDomain, "https://", "/", -1)
-		tmpEmptyDomain := strings.Replace(tmpBaseDomain, "/", "", -1)
-
 		resultMap.Range(func(key, value interface{}) bool {
 			k := gofunc.InterfaceToString(key)
 
-			//判断k是否在基础域名内，防止出界
-			if !gofunc.Strpos(k, tmpBaseDomain) {
-				//判断有没有http://或者https:// 防止 /xxx/xx 没有域名这类的丢失
-				if gofunc.Strpos(k, "http://") || gofunc.Strpos(k, "https://") {
+			/**
+						规则：
+						1、判断k是否在基础域名内，防止出界
+						2、一种情况 //xxx.xx.com/xx.html 判断是否存在http:或https:
+						3、#/a/a.html  没有域名，判断域名
+						4、 /a/a/html  没有域名，判断域名
+						5、http://a.a.com/?return=http:c.a.com 有域名，判断与基础域名是否相等
+						6、data:image 去掉
+						顺序3、4、2、5、1
+			 */
+			parseUrl, err := url.Parse(k)
+			if err != nil {
+				return true
+			}
+			if parseUrl.Host == "" {
+				if gofunc.Strpos(k, "data:image") {
 					return true
 				}
-				//还有一种情况 //xxx.xx.com/xx.html
-				if !gofunc.Strpos(k, "//"+tmpEmptyDomain) {
-					return true
-				} else {
-					k = "http:" + k
-				}
-			}
-
-			//还有一种情况 //xxx.xx.com/xx.html 判断是否存在http:
-			if !gofunc.Strpos(k, "http:") && !gofunc.Strpos(k, "https:") {
-				if gofunc.Strpos(k, "//"+tmpEmptyDomain) {
-					k = "http:" + k
-				}
-			}
-
-			// 判断连接是否完整
-			if !gofunc.Strpos(k, tmpBaseDomain) {
-				//判断域名最后一个是否有 "/" and 判断原始连接第一个是否有 "/" 进行连接
-				if k == "" {
-					k = "/"
-				}
+				//没有域名 3\4 情况
 				k = c.params.BaseDomain + gofunc.ConnectFirstWord(k, "/")
+			} else {
+				//过滤1、2、5情况
+				if tmpBaseDomain != parseUrl.Host {
+					return true
+				}
 			}
 
 			if !c.filter.Contains(k) {
@@ -194,6 +190,7 @@ func (c *FastCrawlEngine) Start() {
 				})
 				c.filter.Add(k)
 			}
+
 			return true
 		})
 	}
@@ -214,74 +211,72 @@ func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, 
 	browserOptions = append(browserOptions,
 		// 拦截网络请求
 		chromedp.WithDebugf(func(s string, i ...interface{}) {
-			go func() {
-				for _, elem := range i {
-					var msg cdproto.Message
-					var msgIn struct {
-						SessionId string `json:"sessionId"`
-						Message   string `json:"message"`
-					}
-					var msgLast cdproto.Message
-					// The CDP messages are sent as strings so we need to convert them back
-					err := json.Unmarshal([]byte(fmt.Sprintf("%s", elem)), &msg)
-					if err != nil {
-						continue
-					}
-					err = json.Unmarshal(msg.Params, &msgIn)
-					if err != nil {
-						continue
-					}
-					err = json.Unmarshal([]byte(msgIn.Message), &msgLast)
-					//log.Println(string(msgIn.Message))
-					// 拦截请求
-					// Network.requestWillBeSent {"requestId":"","loaderId":"","documentURL":"","request":{"url":"http://xxx.xx.com/","method":"GET"}}
-					var BeSent struct {
-						Request struct {
-							Url    string
-							Method string
-						}
-					}
-					// Page.navigatedWithinDocument {"frameId":"","url":"http://xxx.xx.com/#/notice/196"}
-					// Page.windowOpen {"url":"http://xxx.xx.com/#/user/xxx"}
-					// Page.frameScheduledNavigation {"url":"https://passport.jd.com/uc/login?ReturnUrl=http://xxx.xx.com/#/"}
-					var CommonEvent struct {
-						Url string
-					}
-					switch msgLast.Method.String() {
-					case "Network.requestWillBeSent":
-						by, _ := msgLast.Params.MarshalJSON()
-						json.Unmarshal(by, &BeSent)
-						if !FilterNetWorkRequest(BeSent.Request.Url) {
-							r.Store(BeSent.Request.Url, strings.ToLower(BeSent.Request.Method))
-						}
-						break
-					case "Page.navigatedWithinDocument":
-						by, _ := msgLast.Params.MarshalJSON()
-						json.Unmarshal(by, &CommonEvent)
-						if !FilterNetWorkRequest(CommonEvent.Url) {
-							r.Store(CommonEvent.Url, "get")
-						}
-						break
-					case "Page.windowOpen":
-						by, _ := msgLast.Params.MarshalJSON()
-						json.Unmarshal(by, &CommonEvent)
-						if !FilterNetWorkRequest(CommonEvent.Url) {
-							r.Store(CommonEvent.Url, "get")
-						}
-						break
-					case "Page.frameScheduledNavigation":
-						by, _ := msgLast.Params.MarshalJSON()
-						json.Unmarshal(by, &CommonEvent)
-						if !FilterNetWorkRequest(CommonEvent.Url) {
-							r.Store(CommonEvent.Url, "get")
-						}
-						break
+			for _, elem := range i {
+				var msg cdproto.Message
+				var msgIn struct {
+					SessionId string `json:"sessionId"`
+					Message   string `json:"message"`
+				}
+				var msgLast cdproto.Message
+				// The CDP messages are sent as strings so we need to convert them back
+				err := json.Unmarshal([]byte(fmt.Sprintf("%s", elem)), &msg)
+				if err != nil {
+					continue
+				}
+				err = json.Unmarshal(msg.Params, &msgIn)
+				if err != nil {
+					continue
+				}
+				err = json.Unmarshal([]byte(msgIn.Message), &msgLast)
+				//log.Println(string(msgIn.Message))
+				// 拦截请求
+				// Network.requestWillBeSent {"requestId":"","loaderId":"","documentURL":"","request":{"url":"http://xxx.xx.com/","method":"GET"}}
+				var BeSent struct {
+					Request struct {
+						Url    string
+						Method string
 					}
 				}
-			}()
+				// Page.navigatedWithinDocument {"frameId":"","url":"http://xxx.xx.com/#/notice/196"}
+				// Page.windowOpen {"url":"http://xxx.xx.com/#/user/xxx"}
+				// Page.frameScheduledNavigation {"url":"https://passport.jd.com/uc/login?ReturnUrl=http://xxx.xx.com/#/"}
+				var CommonEvent struct {
+					Url string
+				}
+				switch msgLast.Method.String() {
+				case "Network.requestWillBeSent":
+					by, _ := msgLast.Params.MarshalJSON()
+					json.Unmarshal(by, &BeSent)
+					if !FilterNetWorkRequest(BeSent.Request.Url) {
+						r.Store(BeSent.Request.Url, strings.ToLower(BeSent.Request.Method))
+					}
+					break
+				case "Page.navigatedWithinDocument":
+					by, _ := msgLast.Params.MarshalJSON()
+					json.Unmarshal(by, &CommonEvent)
+					if !FilterNetWorkRequest(CommonEvent.Url) {
+						r.Store(CommonEvent.Url, "get")
+					}
+					break
+				case "Page.windowOpen":
+					by, _ := msgLast.Params.MarshalJSON()
+					json.Unmarshal(by, &CommonEvent)
+					if !FilterNetWorkRequest(CommonEvent.Url) {
+						r.Store(CommonEvent.Url, "get")
+					}
+					break
+				case "Page.frameScheduledNavigation":
+					by, _ := msgLast.Params.MarshalJSON()
+					json.Unmarshal(by, &CommonEvent)
+					if !FilterNetWorkRequest(CommonEvent.Url) {
+						r.Store(CommonEvent.Url, "get")
+					}
+					break
+				}
+			}
 		}),
 		chromedp.WithBrowserOption(
-			chromedp.WithDialTimeout(time.Second*10),
+			chromedp.WithDialTimeout(time.Second*5),
 		),
 	)
 	ctx, cancel := chromedp.NewContext(context.Background(), browserOptions...)

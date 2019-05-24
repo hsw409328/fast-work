@@ -12,7 +12,6 @@ import (
 	"github.com/benmanns/goworker"
 	"github.com/hsw409328/gofunc"
 	"github.com/hsw409328/gofunc/go_hlog"
-	"log"
 	"runtime"
 	"time"
 )
@@ -58,7 +57,6 @@ func init() {
 }
 
 func crawl(queue string, args ...interface{}) error {
-	log.Println("队列名称【", queue, "】--------开始执行---------")
 	var fastCrawlParams fast_crawl_engine.FastCrawlEngineParams
 	for _, v := range args {
 		by, err := json.Marshal(v)
@@ -67,14 +65,17 @@ func crawl(queue string, args ...interface{}) error {
 			return err
 		}
 		json.Unmarshal(by, &fastCrawlParams)
-		fast_crawl_engine.NewFastCrawlEngine(fastCrawlParams).Start()
 	}
-	defer log.Println("队列名称【", queue, "】执行完成")
+	clientLog.Info("任务【", fastCrawlParams.DomainStr, "】---Start---")
+
+	fast_crawl_engine.NewFastCrawlEngine(fastCrawlParams).Start()
+
+	defer clientLog.Info("任务【", fastCrawlParams.DomainStr, "】++++End++++")
 	return nil
 }
 
 func Client() {
 	if err := goworker.Work(); err != nil {
-		log.Fatal(err)
+		clientLog.Error(err)
 	}
 }
