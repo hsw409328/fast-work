@@ -18,5 +18,5 @@ func main()  {
 	}
 	log.Println(urlParse.Host)
 
-	log.Println("http:"+"//www.jd.com/phb/key_737d01ea26d1df7bfe1.html")
+	log.Println("http:"+"//www.aaaa.com/phb/key_737d01ea26d1df7bfe1.html")
 }
