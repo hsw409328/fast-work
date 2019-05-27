@@ -75,3 +75,20 @@ func TestClient_QQ(t *testing.T) {
 	})
 	Client()
 }
+
+func TestClient_Ability(t *testing.T) {
+	//http://testphp.vulnweb.com/
+	goworker.Enqueue(&goworker.Job{
+		Queue: "crawl",
+		Payload: goworker.Payload{
+			Class: "Crawl",
+			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
+				BaseDomain:   "http://testphp.vulnweb.com",
+				DomainStr:    "http://testphp.vulnweb.com",
+				MinDeepLevel: 1,
+				MaxDeepLevel: 4,
+			}},
+		},
+	})
+	Client()
+}
