@@ -75,6 +75,8 @@ func crawl(queue string, args ...interface{}) error {
 }
 
 func Client() {
+	//监控 CPU\内存\磁盘
+	MonitorClient()
 	if err := goworker.Work(); err != nil {
 		clientLog.Error(err)
 	}

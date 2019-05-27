@@ -43,6 +43,16 @@ func init() {
 func Server() {
 	//管理在线客户端
 	//添加待扫描任务
-	//下发客户端指令
+	//下发客户端指令 --stop --restart
 	//清空bloom_filter的key
+}
+
+// web模式
+func WebMode() {
+
+}
+
+// 命令行模式
+func CmdMode() {
+
 }
