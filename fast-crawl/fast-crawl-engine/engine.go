@@ -23,7 +23,8 @@ import (
 )
 
 var (
-	jsStr = `try {
+	engineObject *FastCrawlEngine
+	jsStr        = `try {
             	window.alert = function(msg) {};
            		window.confirm = function(msg) {
                		return false
@@ -68,6 +69,7 @@ var (
            		console.log(err)
        		}
 		`
+	once sync.Once
 )
 
 type FastCrawlCookies struct {
@@ -88,15 +90,22 @@ type FastCrawlEngineParams struct {
 type FastCrawlEngine struct {
 	params *FastCrawlEngineParams
 	filter *filter.BloomFilter
+	ctx    context.Context
+	urlStr chan []string
 }
 
 // 外部实例
 func NewFastCrawlEngine(params FastCrawlEngineParams) *FastCrawlEngine {
 	seeds := []uint{7, 11, 13, 31, 37, 61}
-	return &FastCrawlEngine{
-		params: &params,
-		filter: filter.NewBloomFilter(2<<24, seeds, filter.NewRedisSet(2<<24), filter.DefaultHash),
-	}
+	once.Do(func() {
+		engineObject = &FastCrawlEngine{
+			filter: filter.NewBloomFilter(2<<24, seeds, filter.NewRedisSet(2<<24), filter.DefaultHash),
+			urlStr: make(chan []string, 2),
+		}
+		engineObject.initRender()
+	})
+	engineObject.params = &params
+	return engineObject
 }
 
 // 启动扫描
@@ -108,9 +117,16 @@ func (c *FastCrawlEngine) Start() {
 	resultMap := &sync.Map{}
 	resultObject := NewFastCrawlResult()
 
+	//监听回调函数传回的值
+	go func() {
+		for v := range c.urlStr {
+			resultMap.LoadOrStore(v[0], v[1])
+		}
+	}()
+
 	var htmlStr string
 	var jsInterface interface{}
-	err := c.initRender(&htmlStr, &jsInterface, resultMap)
+	err := c.startEngine(&htmlStr, &jsInterface)
 	if err != nil {
 		if err.Error() == "waited too long for page targets to show up" {
 			log.Println(err.Error())
@@ -208,7 +224,7 @@ func (c *FastCrawlEngine) Start() {
 }
 
 // 渲染引擎
-func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, r *sync.Map) error {
+func (c *FastCrawlEngine) initRender() error {
 	var browserOptions []chromedp.ContextOption
 	browserOptions = append(browserOptions,
 		// 拦截网络请求
@@ -250,28 +266,36 @@ func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, 
 					by, _ := msgLast.Params.MarshalJSON()
 					json.Unmarshal(by, &BeSent)
 					if !FilterNetWorkRequest(BeSent.Request.Url) {
-						r.Store(BeSent.Request.Url, strings.ToLower(BeSent.Request.Method))
+						go func() {
+							c.urlStr <- []string{BeSent.Request.Url, strings.ToLower(BeSent.Request.Method)}
+						}()
 					}
 					break
 				case "Page.navigatedWithinDocument":
 					by, _ := msgLast.Params.MarshalJSON()
 					json.Unmarshal(by, &CommonEvent)
 					if !FilterNetWorkRequest(CommonEvent.Url) {
-						r.Store(CommonEvent.Url, "get")
+						go func() {
+							c.urlStr <- []string{CommonEvent.Url, "get"}
+						}()
 					}
 					break
 				case "Page.windowOpen":
 					by, _ := msgLast.Params.MarshalJSON()
 					json.Unmarshal(by, &CommonEvent)
 					if !FilterNetWorkRequest(CommonEvent.Url) {
-						r.Store(CommonEvent.Url, "get")
+						go func() {
+							c.urlStr <- []string{CommonEvent.Url, "get"}
+						}()
 					}
 					break
 				case "Page.frameScheduledNavigation":
 					by, _ := msgLast.Params.MarshalJSON()
 					json.Unmarshal(by, &CommonEvent)
 					if !FilterNetWorkRequest(CommonEvent.Url) {
-						r.Store(CommonEvent.Url, "get")
+						go func() {
+							c.urlStr <- []string{CommonEvent.Url, "get"}
+						}()
 					}
 					break
 				}
@@ -281,9 +305,18 @@ func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, 
 			chromedp.WithDialTimeout(time.Second*5),
 		),
 	)
-	ctx, cancel := chromedp.NewContext(context.Background(), browserOptions...)
-	defer cancel()
 
+	ctx, _ := chromedp.NewExecAllocator(context.Background())
+
+	c.ctx, _ = chromedp.NewContext(ctx, browserOptions...)
+
+	// 启动引擎
+	err := chromedp.Run(c.ctx)
+
+	return err
+}
+
+func (c *FastCrawlEngine) startEngine(htmlStr *string, jsInterface *interface{}) error {
 	// 设置host
 	networkHeaders := network.Headers{}
 	if c.params.Host != "" {
@@ -308,6 +341,8 @@ func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, 
 		}
 	}
 
+	ctx, callFunc := chromedp.NewContext(c.ctx)
+	defer callFunc()
 	// 正式启动引擎
 	err := chromedp.Run(ctx,
 		chromedp.Tasks{
@@ -325,6 +360,5 @@ func (c *FastCrawlEngine) initRender(htmlStr *string, jsInterface *interface{}, 
 			chromedp.EvaluateAsDevTools(jsStr, jsInterface),
 		},
 	)
-
 	return err
 }

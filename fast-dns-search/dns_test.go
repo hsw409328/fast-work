@@ -28,3 +28,15 @@ func TestNewDnsBlast(t *testing.T) {
 	//}()
 	//time.Sleep(time.Second * 1)
 }
+
+func TestDnsEle(t *testing.T) {
+	object := NewDnsBlast("ele.me")
+	object.A = true
+	object.Run()
+}
+
+func TestDnsQq(t *testing.T)  {
+	object := NewDnsBlast("tencent.com")
+	object.A = true
+	object.Run()
+}

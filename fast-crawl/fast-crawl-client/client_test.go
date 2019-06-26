@@ -92,3 +92,20 @@ func TestClient_Ability(t *testing.T) {
 	})
 	Client()
 }
+
+func TestClient_51hsw(t *testing.T) {
+	//http://testphp.vulnweb.com/
+	goworker.Enqueue(&goworker.Job{
+		Queue: "crawl",
+		Payload: goworker.Payload{
+			Class: "Crawl",
+			Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
+				BaseDomain:   "http://www.51hsw.com",
+				DomainStr:    "http://www.51hsw.com",
+				MinDeepLevel: 1,
+				MaxDeepLevel: 4,
+			}},
+		},
+	})
+	Client()
+}
