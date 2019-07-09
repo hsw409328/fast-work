@@ -11,9 +11,10 @@ import (
 )
 
 func FilterNetWorkRequest(string2 string) bool {
-	filterRule := []string{".js", ".png", ".jpg", ".gif", ".flv", ".css"}
+	filterRule := []string{".js", ".png", ".jpg", ".gif", ".flv", ".css", ".woff", ".font"}
 	for _, v := range filterRule {
-		if strings.ToLower(path.Ext(string2)) == v {
+		splitArr := strings.Split(strings.ToLower(path.Ext(string2)), "?")
+		if splitArr[0] == v {
 			return true
 		}
 	}

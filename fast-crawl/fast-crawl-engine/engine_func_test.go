@@ -10,7 +10,7 @@ import (
 )
 
 func TestFilterNetWorkRequest(t *testing.T) {
-	a := "https://news.qq.com/ext2020/apub/json/prevent.new.json"
+	a := "https://news.qq.com/ext2020/apub/json/prevent.new.a?v=18665655644"
 	data := FilterNetWorkRequest(a)
 	expect := false
 	if data != expect {

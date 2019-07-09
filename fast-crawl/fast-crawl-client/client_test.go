@@ -103,7 +103,7 @@ func TestClient_51hsw(t *testing.T) {
 				BaseDomain:   "http://www.51hsw.com",
 				DomainStr:    "http://www.51hsw.com",
 				MinDeepLevel: 1,
-				MaxDeepLevel: 4,
+				MaxDeepLevel: 2,
 			}},
 		},
 	})
