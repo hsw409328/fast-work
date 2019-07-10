@@ -48,6 +48,9 @@ func (c *FastCrawlResult) PrintString() string {
 
 func (c *FastCrawlResult) SendTask() {
 	for _, v := range c.result {
+		if (v.DeepLevel + 1) > v.MaxDeepLevel {
+			return
+		}
 		err := goworker.Enqueue(&goworker.Job{
 			Queue: "crawl",
 			Payload: goworker.Payload{
