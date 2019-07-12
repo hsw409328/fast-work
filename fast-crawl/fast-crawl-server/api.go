@@ -40,19 +40,10 @@ func init() {
 	initLog()
 }
 
-func Server() {
+// 统一对外提供使用 API方法调用
+func Api() {
 	//管理在线客户端
 	//添加待扫描任务
 	//下发客户端指令 --stop --restart
 	//清空bloom_filter的key
-}
-
-// web模式
-func WebMode() {
-
-}
-
-// 命令行模式
-func CmdMode() {
-
 }
