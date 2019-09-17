@@ -219,6 +219,9 @@ func (c *FastCrawlEngine) Start() {
 	//时时查看结果
 	resultObject.PrintString()
 
+	//时时保存结果
+	resultObject.Save()
+
 	//添加每一轮的结果到消息队列中
 	resultObject.SendTask()
 }

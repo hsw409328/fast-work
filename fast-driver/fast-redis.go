@@ -12,6 +12,33 @@ import (
 	"time"
 )
 
+/**
+存储已经爆破的域名结构使用
+dns-search-list
+	[jj.com,aa.com,cc.com,dd.com]
+
+
+域名爆破结果结构使用 根域名+list+success
+例如：
+cc.com-dns-search-list-success
+	{
+		BaseDomain string
+		Domain     string
+		Ip         []string
+		Host       string
+		IsOpen     bool   `是否可以打开`
+		Type       string `结果类型： A\TXT\CNAME\IP`
+	}
+
+爬虫结果存储结构使用 具体域名+list+success
+例如：
+xx.cc.com-crawl-list-success
+	{
+		UrlStr string
+		Title string
+	}
+ */
+
 var (
 	RedisDriver *redis.Client
 )

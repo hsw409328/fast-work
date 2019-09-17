@@ -48,7 +48,10 @@ func (c *DnsResult) Save(data DnsResultData) {
 		if err != nil {
 			fast_log.FastLog.Error(err)
 		}
-		redisCmd := fast_driver.RedisDriver.HSet("dns_"+data.BaseDomain, data.Domain, string(by))
+		//域名爆破结果结构使用 根域名+list+success
+		//cc.com-dns-search-list-success
+		redisCmd := fast_driver.RedisDriver.RPush(data.BaseDomain+"-dns-search-list-success", string(by))
+		//redisCmd := fast_driver.RedisDriver.HSet("dns_"+data.BaseDomain, data.Domain, string(by))
 		if _, err := redisCmd.Result(); err != nil {
 			fast_log.FastLog.Error(err)
 		}
