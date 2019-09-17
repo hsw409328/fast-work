@@ -27,6 +27,7 @@ func Web() {
 	v1 := en.Group("/v1")
 	{
 		v1.GET("/", (&controller_v1.IndexController{}).Get)
+		v1.GET("/json", (&controller_v1.IndexController{}).GetJson)
 		v1.GET("/dns/search", (&controller_v1.IndexController{}).DnsSearch)
 	}
 

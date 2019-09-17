@@ -5,6 +5,16 @@
 
 package controller
 
-type BaseController struct {
+import "github.com/gin-gonic/gin"
 
+type BaseController struct {
+}
+
+func (c *BaseController) JsonEncode(code int, msg string, data interface{}, count int) gin.H {
+	return gin.H{
+		"code":  code,
+		"msg":   msg,
+		"data":  data,
+		"count": count,
+	}
 }

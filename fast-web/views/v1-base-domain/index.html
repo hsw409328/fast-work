@@ -35,8 +35,8 @@
 </div>
 
 <script type="text/html" id="operationTpl">
-    <button class="layui-btn-normal layui-btn-xs">查看结果</button>
-    <button class="layui-btn-normal layui-btn-xs">重新搜索</button>
+    <button class="layui-btn layui-btn-normal layui-btn-xs">查看结果</button>
+    <button class="layui-btn layui-btn-warm layui-btn-xs">重新搜索</button>
 </script>
 <script>
     //一般直接写在一个js文件中
@@ -48,11 +48,11 @@
 
         table.render({
             elem: '#baseDomainListTable'
-            , url: '/'
+            , url: '/v1/json'
             , page: false
             , cols: [[ //表头
-                {type: "number", title: '序列', width: 80, sort: true, fixed: 'left'}
-                , {field: '域名', title: '域名'}
+                {type: "number", title: '序列', width: 80, sort: true,templet:"<span>{{ d.LAY_INDEX }}</span>"}
+                , {field: 'Domain', title: '域名'}
                 , {title: '操作', templet: "#operationTpl"}
             ]]
         });
@@ -69,14 +69,13 @@
         });
 
         form.on("submit(search)", function (data) {
-            //示范一个公告层
             layer.open({
                 type: 2,
                 title: "【" + data.field.baseDomain + "】搜索中...",
                 area: ["60%", "60%"],
                 shade: 0,
                 moveType: 1,
-                content: "/v1/dns/search",
+                content: "/v1/dns/search?domainStr="+data.field.baseDomain,
             });
         });
     });
