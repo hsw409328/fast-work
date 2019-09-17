@@ -7,7 +7,7 @@ package fast_dns_search
 
 import (
 	"encoding/json"
-	"fast-work/fast-drive"
+	"fast-work/fast-driver"
 	"fast-work/fast-log"
 	"fast-work/fast-sys"
 	"github.com/hsw409328/gofunc"
@@ -48,7 +48,7 @@ func (c *DnsResult) Save(data DnsResultData) {
 		if err != nil {
 			fast_log.FastLog.Error(err)
 		}
-		redisCmd := fast_drive.RedisDriver.HSet("dns_"+data.BaseDomain, data.Domain, string(by))
+		redisCmd := fast_driver.RedisDriver.HSet("dns_"+data.BaseDomain, data.Domain, string(by))
 		if _, err := redisCmd.Result(); err != nil {
 			fast_log.FastLog.Error(err)
 		}

@@ -6,7 +6,7 @@
 package fast_crawl_client
 
 import (
-	"fast-work/fast-drive"
+	"fast-work/fast-driver"
 	"github.com/hsw409328/gofunc"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -80,7 +80,7 @@ func MonitorClient() {
 			if err != nil {
 				clientLog.Error(err)
 			}
-			result := fast_drive.RedisDriver.HSet("ClientInfo", hostInfo.Hostname, saveResult)
+			result := fast_driver.RedisDriver.HSet("ClientInfo", hostInfo.Hostname, saveResult)
 			if result.Err() != nil {
 				clientLog.Error(err)
 			}

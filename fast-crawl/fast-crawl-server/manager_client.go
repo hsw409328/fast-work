@@ -5,7 +5,9 @@
 
 package fast_crawl_server
 
-import "fast-work/fast-drive"
+import (
+	"fast-work/fast-driver"
+)
 
 const (
 	ClientSymbol = "ClientInfo"
@@ -15,7 +17,7 @@ type ManagerClient struct {
 }
 
 func (c *ManagerClient) Read() map[string]string {
-	return fast_drive.RedisDriver.HGetAll(ClientSymbol).Val()
+	return fast_driver.RedisDriver.HGetAll(ClientSymbol).Val()
 }
 
 func (c *ManagerClient) Page() {

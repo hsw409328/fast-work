@@ -3,7 +3,7 @@
  * Date: 2019-05-14 18:24 
  */
 
-package fast_drive
+package fast_driver
 
 func init() {
 	initRedis()
