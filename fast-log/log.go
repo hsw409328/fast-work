@@ -1,13 +1,13 @@
 /**
- * Author: haoshuaiwei 
- * Date: 2019-05-14 16:40 
+ * Author: haoshuaiwei
+ * Date: 2019-05-14 16:40
  */
 
 package fast_log
 
 import (
+	"github.com/hsw409328/gofunc"
 	"github.com/hsw409328/gofunc/go_hlog"
-	"gofunc"
 	"time"
 )
 

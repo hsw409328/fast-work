@@ -1,17 +1,19 @@
 /**
- * Author: haoshuaiwei 
- * Date: 2019-05-14 16:28 
+ * Author: haoshuaiwei
+ * Date: 2019-05-14 16:28
  */
 
 package fast_dns_search
 
 import (
+	"context"
 	"fast-work/fast-log"
 	"fast-work/fast-sys"
 	"fmt"
 	"github.com/hsw409328/gofunc"
 	"github.com/hsw409328/gofunc/go_hlog"
 	"github.com/hsw409328/gofunc/go_pool"
+	"log"
 	"net"
 	"runtime"
 	"strconv"
@@ -122,7 +124,7 @@ func (c *DnsBlast) start(val interface{}) {
 }
 
 // 生成爆破任务
-func (c *DnsBlast) createTask() {
+func (c *DnsBlast) createTask(ctx context.Context) {
 	// 判断是否为域名
 	if !gofunc.IsDomain(c.Domain) {
 		fast_log.FastLog.Error(c.Domain, "非合法域名")
@@ -137,6 +139,14 @@ func (c *DnsBlast) createTask() {
 	go func() {
 		for i := 0; i < len(domainDict); i++ {
 			g.Push(domainDict[i] + "." + c.Domain)
+			select {
+			case <-ctx.Done():
+				// 用于结束使用
+				log.Println(c.Domain, "<=================>", "结束结束结束结束结束结束结束结束结束结束结束结束")
+				g.Close()
+				return
+			default:
+			}
 		}
 		g.Close()
 	}()
@@ -144,6 +154,6 @@ func (c *DnsBlast) createTask() {
 }
 
 // 执行
-func (c *DnsBlast) Run() {
-	c.createTask()
+func (c *DnsBlast) Run(ctx context.Context) {
+	c.createTask(ctx)
 }
