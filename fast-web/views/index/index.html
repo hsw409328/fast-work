@@ -1,13 +1,35 @@
 [[[define "index/index.html"]]]
 [[[template "common/header.html" .]]]
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<script>
+    //一般直接写在一个js文件中
+    layui.use(['layer'], function () {
+        var layer = layui.layer;
+        //示范一个公告层
+        layer.open({
+            type: 1
+            ,
+            title: false //不显示标题栏
+            ,
+            closeBtn: false
+            ,
+            area: '300px;'
+            ,
+            shade: 0.3
+            ,
+            btnAlign: 'c'
+            ,
+            moveType: 1 //拖拽模式，0或者1
+            ,
+            content: '<div style="padding: 50px; line-height: 22px; background-color: #8e96a8; color: #fff; font-weight: 300;">' +
+                '系统正在进入' +
+                '</div>'
+            ,
+        });
+        layer.load(1);
+        setTimeout(function () {
+            window.location.href = "/v1"
+        }, 1000)
+    });
+</script>
+[[[template "common/footer.html" .]]]
 [[[end]]]

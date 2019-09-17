@@ -1,0 +1,51 @@
+[[[define "v1-base-domain/dns-search.html"]]]
+[[[template "common/header.html" .]]]
+<div id="baseDomainListDiv" style="padding: 15px">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            域名结果集
+        </div>
+        <div class="layui-card-body">
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="operationTpl">
+    <button class="layui-btn-normal layui-btn-xs">获取URL资源</button>
+    <button class="layui-btn-warm layui-btn-xs">查看URL结果</button>
+</script>
+<script>
+    //一般直接写在一个js文件中
+    layui.use(['layer', 'table'], function () {
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var table = layui.table;
+
+        table.render({
+            elem: '#baseDomainListTable'
+            , url: '/'
+            , page: false
+            , cols: [[
+                {type: "number", title: '序列', width: 80, sort: true, fixed: 'left'}
+                , {field: '域名', title: '域名'}
+                , {field: 'IP', title: '解析IP'}
+                , {field: 'IP', title: '类型'}
+                , {field: 'IP', title: '操作', templet: "#operationTpl"}
+            ]]
+        });
+
+
+        //示范一个公告层
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: false,
+            area: ["95%", "95%"],
+            moveType: 1,
+            content: $('#baseDomainListDiv'),
+        });
+
+    });
+</script>
+[[[template "common/footer.html" .]]]
+[[[end]]]

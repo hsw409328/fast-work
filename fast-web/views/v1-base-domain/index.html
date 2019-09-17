@@ -1,0 +1,85 @@
+[[[define "v1-base-domain/index.html"]]]
+[[[template "common/header.html" .]]]
+<div id="baseDomainListDiv" style="padding: 15px">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form" action="" onsubmit="return false;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">根域名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="baseDomain" lay-verify="baseDomain" autocomplete="off"
+                               placeholder="请输入根域名：xxx.com"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-input-inline" style="color: #ff4148;">
+                        * 请输入根域名，例：a.com
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="search">开始搜索</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-header">
+            已经执行的搜索记录
+        </div>
+        <div class="layui-card-body">
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="operationTpl">
+    <button class="layui-btn-normal layui-btn-xs">查看结果</button>
+    <button class="layui-btn-normal layui-btn-xs">重新搜索</button>
+</script>
+<script>
+    //一般直接写在一个js文件中
+    layui.use(['layer', 'table', 'form'], function () {
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var table = layui.table;
+        var form = layui.form;
+
+        table.render({
+            elem: '#baseDomainListTable'
+            , url: '/'
+            , page: false
+            , cols: [[ //表头
+                {type: "number", title: '序列', width: 80, sort: true, fixed: 'left'}
+                , {field: '域名', title: '域名'}
+                , {title: '操作', templet: "#operationTpl"}
+            ]]
+        });
+
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: false,
+            area: ["85%", "85%"],
+            shade: 0.3,
+            btnAlign: 'c',
+            moveType: 1,
+            content: $('#baseDomainListDiv'),
+        });
+
+        form.on("submit(search)", function (data) {
+            //示范一个公告层
+            layer.open({
+                type: 2,
+                title: "【" + data.field.baseDomain + "】搜索中...",
+                area: ["60%", "60%"],
+                shade: 0,
+                moveType: 1,
+                content: "/v1/dns/search",
+            });
+        });
+    });
+</script>
+[[[template "common/footer.html" .]]]
+[[[end]]]
