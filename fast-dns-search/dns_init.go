@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	domainDict, err = gofunc.ReadLinesForFile("dict/list.txt")
+	domainDict, err = gofunc.ReadLinesForFile(gofunc.GetCurrentPath()+"/dict/list.txt")
 	if err != nil {
 		fast_log.FastLog.Error(err)
 	}

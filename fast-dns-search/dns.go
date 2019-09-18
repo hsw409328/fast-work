@@ -147,6 +147,7 @@ func (c *DnsBlast) createTask(ctx context.Context) {
 				g.Close()
 				return
 			default:
+				break
 			}
 		}
 		// 添加到待关闭爆破的队列 清除掉原来的队列

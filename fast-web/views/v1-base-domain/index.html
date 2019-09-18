@@ -51,7 +51,7 @@
             , url: '/v1/json'
             , page: false
             , cols: [[ //表头
-                {type: "number", title: '序列', width: 80, sort: true,templet:"<span>{{ d.LAY_INDEX }}</span>"}
+                {type: "number", title: '序列', width: 80, sort: true, templet: "<span>{{ d.LAY_INDEX }}</span>"}
                 , {field: 'Domain', title: '域名'}
                 , {title: '操作', templet: "#operationTpl"}
             ]]
@@ -75,7 +75,12 @@
                 area: ["60%", "60%"],
                 shade: 0,
                 moveType: 1,
-                content: "/v1/dns/search?domainStr="+data.field.baseDomain,
+                content: "/v1/dns/search?domainStr=" + data.field.baseDomain,
+                end: function () {
+                    $.get("/v1/dns/search/close?domainStr=" + data.field.baseDomain, function (res) {
+                        console.log(res.msg);
+                    })
+                }
             });
         });
     });

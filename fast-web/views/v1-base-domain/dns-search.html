@@ -6,7 +6,19 @@
             域名结果集
         </div>
         <div class="layui-card-body">
-            <table id="baseDomainListTable" lay-filter="baseDomainListTable"></table>
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable" class="layui-table">
+                <thead>
+                <tr>
+                    <th width="20%">域名</th>
+                    <th width="20%">解析IP</th>
+                    <th width="20%">Host</th>
+                    <th width="20%">类型</th>
+                    <th width="20%">是否可打开</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -21,29 +33,29 @@
         var $ = layui.jquery;
         var table = layui.table;
 
-        table.render({
-            elem: '#baseDomainListTable'
-            , url: '/v1/dns/search/json?domainStr=[[[.baseDomain]]]'
-            , page: false
-            , cols: [[
-                {type: "number", title: '序列', width: 80, sort: true, fixed: 'left'}
-                , {field: 'Domain', title: '域名'}
-                , {field: 'Ip', title: '解析IP'}
-                , {field: 'Host', title: 'Host'}
-                , {field: 'Type', title: '类型'}
-                , {field: 'IsOpen', title: '是否可打开'}
-                , {field: 'IP', title: '操作', templet: "#operationTpl"}
-            ]]
-            , done: function (data) {
-                setTimeout(function () {
-                    table.reload('baseDomainListTable', {
-                        where: {}
-                    });
-                }, 1500);
-            }
-        });
+        var init = function (start) {
+            $.get('/v1/dns/search/json?domainStr=[[[.baseDomain]]]&start=' + start, function (res) {
+                if (res.data.length != 0) {
+                    var htmlStr = "";
+                    for (var o in res.data) {
+                        htmlStr += "<tr>";
+                        htmlStr += "<td>" + res.data[o].Domain + "</td>";
+                        htmlStr += "<td>" + res.data[o].Ip.join(",") + "</td>";
+                        htmlStr += "<td>" + res.data[o].Host + "</td>";
+                        htmlStr += "<td>" + res.data[o].IsOpen + "</td>";
+                        htmlStr += "<td>" + res.data[o].Type + "</td>";
+                        htmlStr += "</tr>";
+                    }
 
-        //示范一个公告层
+                    $('#tableBody').prepend(htmlStr);
+                }
+                setTimeout(function () {
+                    init(parseInt(res.count) - 1);
+                }, 2000);
+            });
+        };
+        init(0);
+
         layer.open({
             type: 1,
             title: false,

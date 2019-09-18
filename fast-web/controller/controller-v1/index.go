@@ -86,3 +86,11 @@ func (c *IndexController) DnsSearchJson(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", tmp, len(tmp)))
 }
+
+// 关闭某个域名爆破结果列表
+func (c *IndexController) DnsSearchClose(ctx *gin.Context) {
+	domainStr := ctx.Query("domainStr")
+	// 添加到待关闭爆破的队列 清除掉原来的队列
+	fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCloseBlastKey, domainStr)
+	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", nil, 0))
+}
