@@ -23,17 +23,25 @@
 
         table.render({
             elem: '#baseDomainListTable'
-            , url: '/'
+            , url: '/v1/dns/search/json?domainStr=[[[.baseDomain]]]'
             , page: false
             , cols: [[
                 {type: "number", title: '序列', width: 80, sort: true, fixed: 'left'}
-                , {field: '域名', title: '域名'}
-                , {field: 'IP', title: '解析IP'}
-                , {field: 'IP', title: '类型'}
+                , {field: 'Domain', title: '域名'}
+                , {field: 'Ip', title: '解析IP'}
+                , {field: 'Host', title: 'Host'}
+                , {field: 'Type', title: '类型'}
+                , {field: 'IsOpen', title: '是否可打开'}
                 , {field: 'IP', title: '操作', templet: "#operationTpl"}
             ]]
+            , done: function (data) {
+                setTimeout(function () {
+                    table.reload('baseDomainListTable', {
+                        where: {}
+                    });
+                }, 1500);
+            }
         });
-
 
         //示范一个公告层
         layer.open({

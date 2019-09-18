@@ -17,6 +17,14 @@ import (
 dns-search-list
 	[jj.com,aa.com,cc.com,dd.com]
 
+待爆破的域名队列
+dns-search-wait-list
+	[jj.com,aa.com,cc.com,dd.com]
+
+需要关闭爆破的域名队列
+dns-search-wait-close-list
+	[jj.com,aa.com,cc.com,dd.com]
+
 
 域名爆破结果结构使用 根域名+list+success
 例如：
@@ -38,6 +46,13 @@ xx.cc.com-crawl-list-success
 		Title string
 	}
  */
+
+const (
+	RedisDnsBlastKey                = "dns-search-list"
+	RedisWaitBlastKey               = "dns-search-wait-list"
+	RedisWaitCloseBlastKey          = "dns-search-wait-close-list"
+	RedisDomainBlastSuffixSymbolKey = "-dns-search-list-success"
+)
 
 var (
 	RedisDriver *redis.Client

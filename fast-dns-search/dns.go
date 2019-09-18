@@ -7,6 +7,7 @@ package fast_dns_search
 
 import (
 	"context"
+	"fast-work/fast-driver"
 	"fast-work/fast-log"
 	"fast-work/fast-sys"
 	"fmt"
@@ -148,6 +149,8 @@ func (c *DnsBlast) createTask(ctx context.Context) {
 			default:
 			}
 		}
+		// 添加到待关闭爆破的队列 清除掉原来的队列
+		fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCloseBlastKey, c.Domain)
 		g.Close()
 	}()
 	g.Run()
