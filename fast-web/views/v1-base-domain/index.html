@@ -35,8 +35,8 @@
 </div>
 
 <script type="text/html" id="operationTpl">
-    <button class="layui-btn layui-btn-normal layui-btn-xs">查看结果</button>
-    <button class="layui-btn layui-btn-warm layui-btn-xs">重新搜索</button>
+    <button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="list">查看结果</button>
+    <button class="layui-btn layui-btn-warm layui-btn-xs" lay-event="research">重新搜索</button>
 </script>
 <script>
     //一般直接写在一个js文件中
@@ -53,8 +53,18 @@
             , cols: [[ //表头
                 {type: "number", title: '序列', width: 80, sort: true, templet: "<span>{{ d.LAY_INDEX }}</span>"}
                 , {field: 'Domain', title: '域名'}
-                , {title: '操作', templet: "#operationTpl"}
+                , {title: '操作', templet: "#operationTpl", width: 180, fixed: "right"}
             ]]
+        });
+
+        table.on('tool(baseDomainListTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent == "research") {
+                researchOpen(data.Domain, 1);
+            } else if (layEvent == "list") {
+                researchOpen(data.Domain, false);
+            }
         });
 
         layer.open({
@@ -68,20 +78,29 @@
             content: $('#baseDomainListDiv'),
         });
 
-        form.on("submit(search)", function (data) {
+        var researchOpen = function (data, isReload) {
+            if (data == "") {
+                layer.msg("请输入【根域名】");
+                return
+            }
             layer.open({
                 type: 2,
-                title: "【" + data.field.baseDomain + "】搜索中...",
+                title: "【" + data + "】搜索中...",
                 area: ["60%", "60%"],
                 shade: 0,
                 moveType: 1,
-                content: "/v1/dns/search?domainStr=" + data.field.baseDomain,
+                content: "/v1/dns/search?domainStr=" + data + "&isReload=" + isReload,
                 end: function () {
-                    $.get("/v1/dns/search/close?domainStr=" + data.field.baseDomain, function (res) {
+                    $.get("/v1/dns/search/close?domainStr=" + data, function (res) {
                         console.log(res.msg);
                     })
                 }
             });
+            table.reload("baseDomainListTable", {});
+        };
+
+        form.on("submit(search)", function (data) {
+            researchOpen(data.field.baseDomain, 1);
         });
     });
 </script>

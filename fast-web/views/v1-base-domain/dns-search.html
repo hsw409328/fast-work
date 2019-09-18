@@ -6,14 +6,14 @@
             域名结果集
         </div>
         <div class="layui-card-body">
-            <table id="baseDomainListTable" lay-filter="baseDomainListTable" class="layui-table">
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable" style="table-layout: fixed;" class="layui-table">
                 <thead>
                 <tr>
-                    <th width="20%">域名</th>
-                    <th width="20%">解析IP</th>
-                    <th width="20%">Host</th>
-                    <th width="20%">类型</th>
-                    <th width="20%">是否可打开</th>
+                    <th width="25%">域名</th>
+                    <th width="30%">解析IP</th>
+                    <th width="15%">Host</th>
+                    <th width="15%">是否可打开</th>
+                    <th width="15%">类型</th>
                 </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -27,6 +27,7 @@
     <button class="layui-btn-warm layui-btn-xs">查看URL结果</button>
 </script>
 <script>
+    var isReload = "[[[.isReload]]]";
     //一般直接写在一个js文件中
     layui.use(['layer', 'table'], function () {
         var layer = layui.layer;
@@ -40,7 +41,7 @@
                     for (var o in res.data) {
                         htmlStr += "<tr>";
                         htmlStr += "<td>" + res.data[o].Domain + "</td>";
-                        htmlStr += "<td>" + res.data[o].Ip.join(",") + "</td>";
+                        htmlStr += "<td style=\"\" >" + res.data[o].Ip.join("<br>") + "</td>";
                         htmlStr += "<td>" + res.data[o].Host + "</td>";
                         htmlStr += "<td>" + res.data[o].IsOpen + "</td>";
                         htmlStr += "<td>" + res.data[o].Type + "</td>";
@@ -49,9 +50,11 @@
 
                     $('#tableBody').prepend(htmlStr);
                 }
-                setTimeout(function () {
-                    init(parseInt(res.count) - 1);
-                }, 2000);
+                if (isReload == "1") {
+                    setTimeout(function () {
+                        init(parseInt(res.count) - 1);
+                    }, 2000);
+                }
             });
         };
         init(0);

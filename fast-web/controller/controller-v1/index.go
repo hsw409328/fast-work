@@ -61,12 +61,20 @@ func (c *IndexController) researchDns(domainStr string) {
 // 搜索页
 func (c *IndexController) DnsSearch(ctx *gin.Context) {
 	domainStr := ctx.Query("domainStr")
-	err := c.CheckDnsBlastDomainIsExist(domainStr)
-	if !err {
-		fast_driver.RedisDriver.RPush(fast_driver.RedisDnsBlastKey, domainStr)
+	isReload := ctx.Query("isReload")
+	if domainStr != "" {
+		err := c.CheckDnsBlastDomainIsExist(domainStr)
+		if !err {
+			fast_driver.RedisDriver.RPush(fast_driver.RedisDnsBlastKey, domainStr)
+		}
+		if isReload == "1" {
+			c.researchDns(domainStr)
+		}
 	}
-	c.researchDns(domainStr)
-	ctx.HTML(http.StatusOK, "v1-base-domain/dns-search.html", gin.H{"baseDomain": domainStr})
+	ctx.HTML(http.StatusOK, "v1-base-domain/dns-search.html", gin.H{
+		"baseDomain": domainStr,
+		"isReload":   isReload,
+	})
 }
 
 // 某个域名爆破结果列表
