@@ -145,7 +145,9 @@ func (c *FastCrawlEngine) Start() {
 			log.Println(err)
 		}
 
+		// @TODO 标题获取有问题
 		title := doc.Find("title").Text()
+		log.Println(title)
 		doc.Find("a").Each(func(i int, selection *goquery.Selection) {
 			urlStr, _ := selection.Attr("href")
 			resultMap.Store(urlStr, "get")
@@ -206,7 +208,7 @@ func (c *FastCrawlEngine) Start() {
 					Host:         c.params.Host,
 					Cookies:      c.params.Cookies,
 				})
-				c.filter.Add(k)
+				//c.filter.Add(k)
 			}
 
 			return true

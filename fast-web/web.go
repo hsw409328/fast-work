@@ -36,6 +36,7 @@ func Web() {
 		v1.GET("/dns/search/json", (&controller_v1.IndexController{}).DnsSearchJson)
 		v1.GET("/dns/search/close", (&controller_v1.IndexController{}).DnsSearchClose)
 		v1.GET("/crawl/search", (&controller_v1.IndexController{}).CrawlSearch)
+		v1.POST("/crawl/search/add", (&controller_v1.IndexController{}).CrawlSearchAdd)
 		v1.GET("/crawl/search/json", (&controller_v1.IndexController{}).CrawlSearchJson)
 	}
 

@@ -47,7 +47,7 @@ func (c *FastCrawlResult) All() []*FastCrawlResultData {
 
 func (c *FastCrawlResult) PrintString() string {
 	for _, v := range c.result {
-		log.Println("【深度】：", v.DeepLevel, "  【请求】：", v.UrlStr)
+		log.Println("【深度】：", v.DeepLevel, "  【请求】：", v.UrlStr, "   ", v.Title)
 	}
 	return ""
 }

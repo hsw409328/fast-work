@@ -12,6 +12,7 @@ import (
 	"github.com/benmanns/goworker"
 	"github.com/hsw409328/gofunc"
 	"github.com/hsw409328/gofunc/go_hlog"
+	"log"
 	"runtime"
 	"time"
 )
@@ -66,16 +67,15 @@ func crawl(queue string, args ...interface{}) error {
 		}
 		json.Unmarshal(by, &fastCrawlParams)
 	}
-	clientLog.Info("任务【", fastCrawlParams.DomainStr, "】---Start---")
-
+	clientLog.Info("任务【", fastCrawlParams.DomainStr, "】---开始---")
 	fast_crawl_engine.NewFastCrawlEngine(fastCrawlParams).Start()
-
-	defer clientLog.Info("任务【", fastCrawlParams.DomainStr, "】++++End++++")
+	defer clientLog.Info("任务【", fastCrawlParams.DomainStr, "】++++结束++++")
 	return nil
 }
 
 func Client() {
 	//监控 CPU\内存\磁盘
+	log.Println("启动爬虫客户端...")
 	MonitorClient()
 	if err := goworker.Work(); err != nil {
 		clientLog.Error(err)

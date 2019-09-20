@@ -24,6 +24,60 @@
         </div>
     </div>
 </div>
+<div id="formDiv" style="padding: 15px;display: none">
+    <form class="layui-form" onsubmit="return false">
+        <div class="layui-form-item">
+            <label class="layui-form-label">爬虫域名</label>
+            <div class="layui-input-block">
+                <input type="text" name="domainStr" required lay-verify="required" placeholder="请输入标题"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">爬虫深度</label>
+            <div class="layui-input-inline">
+                <input type="number" name="maxDeepInt" required lay-verify="required" placeholder="爬虫深度"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">爬虫深度：默认为1，可设置最大深度10，建议深度4</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">设置HOST</label>
+            <div class="layui-input-inline">
+                <input type="text" name="host" placeholder="设置HOST (可以为空)" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">cookie值</label>
+            <div class="layui-input-block">
+                <input type="text" name="cookieValue" placeholder="cookie值（不设置cookie，可为空）" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">cookie域</label>
+            <div class="layui-input-block">
+                <input type="text" name="cookieDomain" placeholder="cookie域（不设置cookie，可为空）" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">cookie路径</label>
+            <div class="layui-input-block">
+                <input type="text" name="cookiePath" placeholder="cookie路径 （不设置cookie，可为空）" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
 <script type="text/html" id="operationTpl">
     <button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="getSource">获取资源</button>
     <button class="layui-btn layui-btn-warm layui-btn-xs" lay-event="see">查看结果</button>
@@ -31,51 +85,93 @@
 <script>
     var isReload = "[[[.isReload]]]";
     //一般直接写在一个js文件中
-    layui.use(['layer', 'table'], function () {
+    layui.use(['layer', 'form'], function () {
         var layer = layui.layer;
         var $ = layui.jquery;
-        var table = layui.table;
+        var form = layui.form;
 
+        var lastMd5 = "";
+        var count = 0;
         var init = function (start) {
-            $.get('/v1/dns/search/json?domainStr=[[[.baseDomain]]]&start=' + start, function (res) {
-                if (res.data.length != 0) {
-                    var htmlStr = "";
-                    for (var o in res.data) {
-                        htmlStr += "<tr>";
-                        htmlStr += "<td>" + res.data[o].Domain + "</td>";
-                        htmlStr += "<td style=\"\" >" + res.data[o].Ip.join("<br>") + "</td>";
-                        htmlStr += "<td>" + res.data[o].Host + "</td>";
-                        htmlStr += "<td>" + res.data[o].IsOpen + "</td>";
-                        htmlStr += "<td>" + res.data[o].Type + "</td>";
-                        htmlStr += "<td>\n" +
-                            "    <button class=\"layui-btn layui-btn-normal layui-btn-xs\" k=" + res.data[o].Domain + "" +
-                            " lay-event=\"getSource\">获取资源</button>\n" +
-                            "    <button class=\"layui-btn layui-btn-warm layui-btn-xs\" k=" + res.data[o].Domain + "" +
-                            " lay-event=\"see\">查看结果</button>" +
-                            "</td>";
-                        htmlStr += "</tr>";
+                $.get('/v1/dns/search/json?domainStr=[[[.baseDomain]]]&start=' + start, function (res) {
+                        if (res.data.length != 0) {
+                            var htmlStr = "";
+                            for (var o in res.data) {
+                                htmlStr += "<tr>";
+                                htmlStr += "<td>" + res.data[o].Domain + "</td>";
+                                htmlStr += "<td style=\"\" >" + res.data[o].Ip.join("<br>") + "</td>";
+                                htmlStr += "<td>" + res.data[o].Host + "</td>";
+                                htmlStr += "<td>" + res.data[o].IsOpen + "</td>";
+                                htmlStr += "<td>" + res.data[o].Type + "</td>";
+                                htmlStr += "<td>\n" +
+                                    "    <button class=\"layui-btn layui-btn-normal layui-btn-xs\" k=" + res.data[o].Domain + "" +
+                                    " lay-event=\"getSource\">获取资源</button><br>\n" +
+                                    "    <button class=\"layui-btn layui-btn-warm layui-btn-xs\" k=" + res.data[o].Domain + "" +
+                                    " lay-event=\"see\">查看结果</button>" +
+                                    "</td>";
+                                htmlStr += "</tr>";
+                            }
+                            if (lastMd5 != res.msg) {
+                                if (htmlStr != "") {
+                                    $('#tableBody').prepend(htmlStr);
+                                    lastMd5 = res.msg;
+                                }
+                            }
+                        }
+                        initClick();
+                        if (isReload == "1") {
+                            setTimeout(function () {
+                                count += parseInt(res.count) - 1;
+                                if (count<0){
+                                    count += parseInt(res.count);
+                                }
+                                init(count);
+                            }, 2000);
+                        }
                     }
-
-                    $('#tableBody').prepend(htmlStr);
-                }
-                if (isReload == "1") {
-                    setTimeout(function () {
-                        init(parseInt(res.count) - 1);
-                    }, 2000);
-                }
-            });
-        };
+                );
+            }
+        ;
         init(0);
 
-        $('*[lay-event="getSource"]').click(function () {
-            var d = $(this).attr("k");
-            window.open("/v1/crawl/search?isReload=1&domainStr=" + d);
+        var initClick = function () {
+            $('*[lay-event="getSource"]').click(function () {
+                $('*[type="reset"]').click();
+                $('input[name="domainStr"]').val("http://" + $(this).attr("k"));
+                $('input[name="maxDeepInt"]').val(1);
+                layer.open({
+                    type: 1,
+                    title: false,
+                    closeBtn: false,
+                    area: ["80%", "80%"],
+                    moveType: 1,
+                    content: $('#formDiv'),
+                });
+            });
+            $('*[lay-event="see"]').click(function () {
+                var d = $(this).attr("k");
+                window.open("/v1/crawl/search?isReload=0bai&domainStr=" + d);
+            });
+        }
+
+        form.on("submit(formSubmit)", function (data) {
+            layer.load(1);
+            $.post("/v1/crawl/search/add?isReload=1&domainStr=" + data.field.domainStr, data.field, function (res) {
+                if (res.code == 0) {
+                    layer.closeAll();
+                    layer.msg(res.msg);
+                    var d = data.field.domainStr.replace("http://", "");
+                    var d = d.replace("https://", "");
+                    window.open("/v1/crawl/search?isReload=1&domainStr=" + d);
+                } else {
+                    layer.msg(res.msg);
+                }
+                layer.closeAll("loading")
+            });
+
+            return false;
         });
 
-        $('*[lay-event="see"]').click(function () {
-            var d = $(this).attr("k");
-            window.open("/v1/crawl/search?isReload=0bai&domainStr=" + d);
-        });
 
         layer.open({
             type: 1,
@@ -86,7 +182,8 @@
             content: $('#baseDomainListDiv'),
         });
 
-    });
+    })
+    ;
 </script>
 [[[template "common/footer.html" .]]]
 [[[end]]]

@@ -22,7 +22,7 @@ var (
 
 // 监听待爆破的域名列表
 func listenWaitBlastList() {
-	log.Println("开始监听待爆破的域名列表...")
+	log.Println("启动监听待爆破的域名列表...")
 	go func() {
 		for {
 			r := fast_driver.RedisDriver.LPop(fast_driver.RedisWaitBlastKey).Val()
@@ -42,7 +42,7 @@ func listenWaitBlastList() {
 
 // 监听需要关闭的域名列表
 func listenWaitCloaseBlastList() {
-	log.Println("开始监听需要关闭的爆破域名列表...")
+	log.Println("启动监听需要关闭的爆破域名列表...")
 	go func() {
 		for {
 			r := fast_driver.RedisDriver.LPop(fast_driver.RedisWaitCloseBlastKey).Val()
@@ -65,7 +65,7 @@ func listenWaitCloaseBlastList() {
 
 // 监听待爆破的域名列表
 func listenWaitCrawlList() {
-	log.Println("开始监听待爬虫的域名列表...")
+	log.Println("启动监听待爬虫的域名列表...")
 	go func() {
 		for {
 			r := fast_driver.RedisDriver.LPop(fast_driver.RedisWaitCrawlKey).Val()

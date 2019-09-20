@@ -39,13 +39,14 @@ func initLog() {
 
 func init() {
 	initLog()
+	go Api("start")
 }
 
 // 统一对外提供使用 API方法调用
 func Api(cmdStr string) interface{} {
 	switch cmdStr {
 	case "start":
-		// 启动
+		// 启动爬虫客户端扫描队列
 		fast_crawl_client.Client()
 	case "stop":
 	case "clear_bloom_filter":

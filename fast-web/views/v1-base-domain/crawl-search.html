@@ -1,9 +1,9 @@
-[[[define "v1-base-domain/dns-search.html"]]]
+[[[define "v1-base-domain/crawl-search.html"]]]
 [[[template "common/header.html" .]]]
 <div id="baseDomainListDiv" style="padding: 15px">
     <div class="layui-card">
         <div class="layui-card-header">
-            域名结果集
+            【[[[.baseDomain]]]】爬虫结果集
         </div>
         <div class="layui-card-body">
             <table id="baseDomainListTable" lay-filter="baseDomainListTable" style="table-layout: fixed;"
@@ -30,6 +30,8 @@
         var $ = layui.jquery;
         var table = layui.table;
 
+        var lastMd5 = "";
+        var count = 0;
         var init = function (start) {
             $.get('/v1/crawl/search/json?domainStr=[[[.baseDomain]]]&start=' + start, function (res) {
                 if (res.data.length != 0) {
@@ -41,13 +43,22 @@
                         htmlStr += "</tr>";
                     }
 
-                    $('#tableBody').prepend(htmlStr);
+                    if (lastMd5 != res.msg) {
+                        if (htmlStr != "") {
+                            $('#tableBody').prepend(htmlStr);
+                            lastMd5 = res.msg;
+                        }
+                    }
                 }
-                if (isReload == "1") {
-                    setTimeout(function () {
-                        init(parseInt(res.count) - 1);
-                    }, 2000);
-                }
+                // if (isReload == "1") {
+                setTimeout(function () {
+                    count += parseInt(res.count) - 1;
+                    if (count<0){
+                        count += parseInt(res.count);
+                    }
+                    init(count);
+                }, 2000);
+                // }
             });
         };
         init(0);

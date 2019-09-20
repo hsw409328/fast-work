@@ -12,9 +12,11 @@ import (
 	"fast-work/fast-driver"
 	"fast-work/fast-web/controller"
 	"github.com/gin-gonic/gin"
+	"github.com/hsw409328/gofunc"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type IndexController struct {
@@ -93,7 +95,7 @@ func (c *IndexController) DnsSearchJson(ctx *gin.Context) {
 		}
 		tmp = append(tmp, rr)
 	}
-	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", tmp, len(tmp)))
+	ctx.JSON(http.StatusOK, c.JsonEncode(0, gofunc.Md5Encrypt(strings.Join(r, "")), tmp, len(tmp)))
 }
 
 // 关闭某个域名爆破结果列表
@@ -107,44 +109,113 @@ func (c *IndexController) DnsSearchClose(ctx *gin.Context) {
 // 爬虫
 func (c *IndexController) CrawlSearch(ctx *gin.Context) {
 	domainStr := ctx.Query("domainStr")
-	hostStr := ctx.Query("host")
-	maxDeepLevel, _ := strconv.Atoi(ctx.Query("maxDeepInt"))
+	hostStr := ctx.PostForm("host")
+	maxDeepLevel, _ := strconv.Atoi(ctx.PostForm("maxDeepInt"))
 
-	cookieValue := ctx.Query("cookieValue")
-	cookieDomain := ctx.Query("cookieDomain")
-	cookiePath := ctx.Query("cookiePath")
+	cookieValue := ctx.PostForm("cookieValue")
+	cookieDomain := ctx.PostForm("cookieDomain")
+	cookiePath := ctx.PostForm("cookiePath")
 
 	isReload := ctx.Query("isReload")
-
-	taskObject := fast_crawl_engine.FastCrawlEngineParams{
-		BaseDomain:   domainStr,
-		DomainStr:    domainStr,
-		MinDeepLevel: 1,
-		MaxDeepLevel: maxDeepLevel,
-		//Cookies: &fast_crawl_engine.FastCrawlCookies{
-		//	Value:  "请使用自己的cookie",
-		//	Domain: ".xxx.com",
-		//	Path:   "/",
-		//},
-		//Cookies: nil,
-		//Host: "127.0.0.1",
-	}
-	if cookieValue != "" && cookieDomain != "" && cookiePath != "" {
-		taskObject.Cookies = &fast_crawl_engine.FastCrawlCookies{
-			Value:  cookieValue,
-			Domain: cookieDomain,
-			Path:   cookiePath,
+	if isReload == "1" {
+		if domainStr == "" || maxDeepLevel <= 0 {
+			ctx.HTML(http.StatusOK, "v1-base-domain/crawl-search.html", gin.H{
+				"baseDomain": domainStr,
+				"isReload":   isReload,
+				"err":        "添加爬虫任务失败，参数设置错误。",
+			})
+			return
 		}
+		taskObject := fast_crawl_engine.FastCrawlEngineParams{
+			BaseDomain:   domainStr,
+			DomainStr:    domainStr,
+			MinDeepLevel: 1,
+			MaxDeepLevel: maxDeepLevel,
+			//Cookies: &fast_crawl_engine.FastCrawlCookies{
+			//	Value:  "请使用自己的cookie",
+			//	Domain: ".xxx.com",
+			//	Path:   "/",
+			//},
+			//Cookies: nil,
+			//Host: "127.0.0.1",
+		}
+		if cookieValue != "" && cookieDomain != "" && cookiePath != "" {
+			taskObject.Cookies = &fast_crawl_engine.FastCrawlCookies{
+				Value:  cookieValue,
+				Domain: cookieDomain,
+				Path:   cookiePath,
+			}
+		}
+		if hostStr != "" {
+			taskObject.Host = hostStr
+		}
+		by, err := json.Marshal(taskObject)
+		if err != nil {
+			ctx.HTML(http.StatusOK, "v1-base-domain/crawl-search.html", gin.H{
+				"baseDomain": domainStr,
+				"isReload":   isReload,
+				"err":        "添加爬虫任务失败，无法开启扫描。" + err.Error(),
+			})
+			return
+		}
+		fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCrawlKey, string(by))
 	}
-	if hostStr != "" {
-		taskObject.Host = hostStr
-	}
-
-	fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCrawlKey, )
 	ctx.HTML(http.StatusOK, "v1-base-domain/crawl-search.html", gin.H{
 		"baseDomain": domainStr,
 		"isReload":   isReload,
 	})
+}
+
+// 爬虫
+func (c *IndexController) CrawlSearchAdd(ctx *gin.Context) {
+	domainStr := ctx.Query("domainStr")
+	hostStr := ctx.PostForm("host")
+	maxDeepLevel, _ := strconv.Atoi(ctx.PostForm("maxDeepInt"))
+
+	cookieValue := ctx.PostForm("cookieValue")
+	cookieDomain := ctx.PostForm("cookieDomain")
+	cookiePath := ctx.PostForm("cookiePath")
+
+	isReload := ctx.Query("isReload")
+	if isReload == "1" {
+		if domainStr == "" || maxDeepLevel <= 0 {
+			ctx.JSON(http.StatusOK, c.JsonEncode(101, "添加任务失败，参数不正确", nil, 0))
+			return
+		}
+		taskObject := fast_crawl_engine.FastCrawlEngineParams{
+			BaseDomain:   domainStr,
+			DomainStr:    domainStr,
+			MinDeepLevel: 1,
+			MaxDeepLevel: maxDeepLevel,
+			//Cookies: &fast_crawl_engine.FastCrawlCookies{
+			//	Value:  "请使用自己的cookie",
+			//	Domain: ".xxx.com",
+			//	Path:   "/",
+			//},
+			//Cookies: nil,
+			//Host: "127.0.0.1",
+		}
+		if cookieValue != "" && cookieDomain != "" && cookiePath != "" {
+			taskObject.Cookies = &fast_crawl_engine.FastCrawlCookies{
+				Value:  cookieValue,
+				Domain: cookieDomain,
+				Path:   cookiePath,
+			}
+		}
+		if hostStr != "" {
+			taskObject.Host = hostStr
+		}
+		by, err := json.Marshal(taskObject)
+		if err != nil {
+			ctx.JSON(http.StatusOK, c.JsonEncode(101, "添加爬虫任务失败，无法开启扫描。"+err.Error(), nil, 0))
+			return
+		}
+		fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCrawlKey, string(by))
+		ctx.JSON(http.StatusOK, c.JsonEncode(0, "添加成功", nil, 0))
+		return
+	}
+	ctx.JSON(http.StatusOK, c.JsonEncode(101, "添加任务失败，非正常操作", nil, 0))
+	return
 }
 
 // 某个域名爬虫结果列表数据
@@ -168,5 +239,5 @@ func (c *IndexController) CrawlSearchJson(ctx *gin.Context) {
 		}
 		tmp = append(tmp, rr)
 	}
-	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", tmp, len(tmp)))
+	ctx.JSON(http.StatusOK, c.JsonEncode(0, gofunc.Md5Encrypt(strings.Join(r, "")), tmp, len(tmp)))
 }
