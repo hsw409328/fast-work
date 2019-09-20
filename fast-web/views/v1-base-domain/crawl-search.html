@@ -1,0 +1,67 @@
+[[[define "v1-base-domain/dns-search.html"]]]
+[[[template "common/header.html" .]]]
+<div id="baseDomainListDiv" style="padding: 15px">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            域名结果集
+        </div>
+        <div class="layui-card-body">
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable" style="table-layout: fixed;"
+                   class="layui-table">
+                <thead>
+                <tr>
+                    <th width="30%">标题</th>
+                    <th width="70%">地址</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="operationTpl">
+</script>
+<script>
+    var isReload = "[[[.isReload]]]";
+    //一般直接写在一个js文件中
+    layui.use(['layer', 'table'], function () {
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var table = layui.table;
+
+        var init = function (start) {
+            $.get('/v1/crawl/search/json?domainStr=[[[.baseDomain]]]&start=' + start, function (res) {
+                if (res.data.length != 0) {
+                    var htmlStr = "";
+                    for (var o in res.data) {
+                        htmlStr += "<tr>";
+                        htmlStr += "<td>" + res.data[o].Title + "</td>";
+                        htmlStr += "<td>" + res.data[o].UrlStr + "</td>";
+                        htmlStr += "</tr>";
+                    }
+
+                    $('#tableBody').prepend(htmlStr);
+                }
+                if (isReload == "1") {
+                    setTimeout(function () {
+                        init(parseInt(res.count) - 1);
+                    }, 2000);
+                }
+            });
+        };
+        init(0);
+
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: false,
+            area: ["95%", "95%"],
+            moveType: 1,
+            content: $('#baseDomainListDiv'),
+        });
+
+    });
+</script>
+[[[template "common/footer.html" .]]]
+[[[end]]]

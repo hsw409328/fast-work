@@ -16,6 +16,7 @@ func Web() {
 	// 监听
 	listenWaitBlastList()
 	listenWaitCloaseBlastList()
+	listenWaitCrawlList()
 
 	// 启动WEB管理
 	en := gin.Default()
@@ -34,6 +35,8 @@ func Web() {
 		v1.GET("/dns/search", (&controller_v1.IndexController{}).DnsSearch)
 		v1.GET("/dns/search/json", (&controller_v1.IndexController{}).DnsSearchJson)
 		v1.GET("/dns/search/close", (&controller_v1.IndexController{}).DnsSearchClose)
+		v1.GET("/crawl/search", (&controller_v1.IndexController{}).CrawlSearch)
+		v1.GET("/crawl/search/json", (&controller_v1.IndexController{}).CrawlSearchJson)
 	}
 
 	webRunConfig, _ := fast_sys.GoConfig.GetString("web", "run_config")

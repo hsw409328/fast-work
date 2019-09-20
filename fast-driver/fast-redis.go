@@ -38,6 +38,12 @@ cc.com-dns-search-list-success
 		Type       string `结果类型： A\TXT\CNAME\IP`
 	}
 
+待爬虫的域名队列
+crawl-search-wait-list
+	[
+		序列化：FastCrawlEngineParams 结果
+	]
+
 爬虫结果存储结构使用 具体域名+list+success
 例如：
 xx.cc.com-crawl-list-success
@@ -52,6 +58,8 @@ const (
 	RedisWaitBlastKey               = "dns-search-wait-list"
 	RedisWaitCloseBlastKey          = "dns-search-wait-close-list"
 	RedisDomainBlastSuffixSymbolKey = "-dns-search-list-success"
+	RedisDomainCrawlSuffixSymbolKey = "-crawl-list-success"
+	RedisWaitCrawlKey               = "crawl-search-wait-list"
 )
 
 var (

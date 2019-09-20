@@ -6,6 +6,7 @@
 package fast_crawl_server
 
 import (
+	"fast-work/fast-crawl/fast-crawl-client"
 	"fast-work/fast-sys"
 	"github.com/hsw409328/gofunc"
 	"github.com/hsw409328/gofunc/go_hlog"
@@ -41,9 +42,19 @@ func init() {
 }
 
 // 统一对外提供使用 API方法调用
-func Api() {
-	//管理在线客户端
-	//添加待扫描任务
-	//下发客户端指令 --stop --restart
-	//清空bloom_filter的key
+func Api(cmdStr string) interface{} {
+	switch cmdStr {
+	case "start":
+		// 启动
+		fast_crawl_client.Client()
+	case "stop":
+	case "clear_bloom_filter":
+		ClearBloomFilter("fastCrawlKey")
+	case "client_list":
+		// 启动
+		return (&ManagerClient{}).Read()
+	default:
+		break
+	}
+	return nil
 }

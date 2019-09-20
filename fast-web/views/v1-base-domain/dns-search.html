@@ -13,8 +13,9 @@
                     <th width="25%">域名</th>
                     <th width="30%">解析IP</th>
                     <th width="15%">Host</th>
-                    <th width="15%">是否可打开</th>
-                    <th width="15%">类型</th>
+                    <th width="10%">是否可打开</th>
+                    <th width="5%">类型</th>
+                    <th width="15%">操作</th>
                 </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -46,6 +47,12 @@
                         htmlStr += "<td>" + res.data[o].Host + "</td>";
                         htmlStr += "<td>" + res.data[o].IsOpen + "</td>";
                         htmlStr += "<td>" + res.data[o].Type + "</td>";
+                        htmlStr += "<td>\n" +
+                            "    <button class=\"layui-btn layui-btn-normal layui-btn-xs\" k=" + res.data[o].Domain + "" +
+                            " lay-event=\"getSource\">获取资源</button>\n" +
+                            "    <button class=\"layui-btn layui-btn-warm layui-btn-xs\" k=" + res.data[o].Domain + "" +
+                            " lay-event=\"see\">查看结果</button>" +
+                            "</td>";
                         htmlStr += "</tr>";
                     }
 
@@ -59,6 +66,16 @@
             });
         };
         init(0);
+
+        $('*[lay-event="getSource"]').click(function () {
+            var d = $(this).attr("k");
+            window.open("/v1/crawl/search?isReload=1&domainStr=" + d);
+        });
+
+        $('*[lay-event="see"]').click(function () {
+            var d = $(this).attr("k");
+            window.open("/v1/crawl/search?isReload=0bai&domainStr=" + d);
+        });
 
         layer.open({
             type: 1,

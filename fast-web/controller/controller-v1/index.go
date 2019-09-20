@@ -7,6 +7,7 @@ package controller_v1
 
 import (
 	"encoding/json"
+	"fast-work/fast-crawl/fast-crawl-engine"
 	"fast-work/fast-dns-search"
 	"fast-work/fast-driver"
 	"fast-work/fast-web/controller"
@@ -101,4 +102,71 @@ func (c *IndexController) DnsSearchClose(ctx *gin.Context) {
 	// 添加到待关闭爆破的队列 清除掉原来的队列
 	fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCloseBlastKey, domainStr)
 	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", nil, 0))
+}
+
+// 爬虫
+func (c *IndexController) CrawlSearch(ctx *gin.Context) {
+	domainStr := ctx.Query("domainStr")
+	hostStr := ctx.Query("host")
+	maxDeepLevel, _ := strconv.Atoi(ctx.Query("maxDeepInt"))
+
+	cookieValue := ctx.Query("cookieValue")
+	cookieDomain := ctx.Query("cookieDomain")
+	cookiePath := ctx.Query("cookiePath")
+
+	isReload := ctx.Query("isReload")
+
+	taskObject := fast_crawl_engine.FastCrawlEngineParams{
+		BaseDomain:   domainStr,
+		DomainStr:    domainStr,
+		MinDeepLevel: 1,
+		MaxDeepLevel: maxDeepLevel,
+		//Cookies: &fast_crawl_engine.FastCrawlCookies{
+		//	Value:  "请使用自己的cookie",
+		//	Domain: ".xxx.com",
+		//	Path:   "/",
+		//},
+		//Cookies: nil,
+		//Host: "127.0.0.1",
+	}
+	if cookieValue != "" && cookieDomain != "" && cookiePath != "" {
+		taskObject.Cookies = &fast_crawl_engine.FastCrawlCookies{
+			Value:  cookieValue,
+			Domain: cookieDomain,
+			Path:   cookiePath,
+		}
+	}
+	if hostStr != "" {
+		taskObject.Host = hostStr
+	}
+
+	fast_driver.RedisDriver.RPush(fast_driver.RedisWaitCrawlKey, )
+	ctx.HTML(http.StatusOK, "v1-base-domain/crawl-search.html", gin.H{
+		"baseDomain": domainStr,
+		"isReload":   isReload,
+	})
+}
+
+// 某个域名爬虫结果列表数据
+func (c *IndexController) CrawlSearchJson(ctx *gin.Context) {
+	domainStr := ctx.Query("domainStr")
+	start, _ := strconv.Atoi(ctx.Query("start"))
+	r := fast_driver.RedisDriver.LRange(domainStr+fast_driver.RedisDomainCrawlSuffixSymbolKey, int64(start), -1).Val()
+	var tmp = make([]struct {
+		UrlStr string
+		Title  string
+	}, 0)
+	var rr struct {
+		UrlStr string
+		Title  string
+	}
+	for _, v := range r {
+		err := json.Unmarshal([]byte(v), &rr)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		tmp = append(tmp, rr)
+	}
+	ctx.JSON(http.StatusOK, c.JsonEncode(0, "success", tmp, len(tmp)))
 }
