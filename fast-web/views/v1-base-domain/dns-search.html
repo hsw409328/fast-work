@@ -6,7 +6,8 @@
             域名结果集
         </div>
         <div class="layui-card-body">
-            <table id="baseDomainListTable" lay-filter="baseDomainListTable" style="table-layout: fixed;" class="layui-table">
+            <table id="baseDomainListTable" lay-filter="baseDomainListTable" style="table-layout: fixed;"
+                   class="layui-table">
                 <thead>
                 <tr>
                     <th width="25%">域名</th>
@@ -23,8 +24,8 @@
     </div>
 </div>
 <script type="text/html" id="operationTpl">
-    <button class="layui-btn-normal layui-btn-xs">获取URL资源</button>
-    <button class="layui-btn-warm layui-btn-xs">查看URL结果</button>
+    <button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="getSource">获取资源</button>
+    <button class="layui-btn layui-btn-warm layui-btn-xs" lay-event="see">查看结果</button>
 </script>
 <script>
     var isReload = "[[[.isReload]]]";

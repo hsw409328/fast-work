@@ -309,7 +309,13 @@ func (c *FastCrawlEngine) initRender() error {
 		),
 	)
 
-	ctx, _ := chromedp.NewExecAllocator(context.Background())
+	ctx, _ := chromedp.NewExecAllocator(context.Background(),
+		[]chromedp.ExecAllocatorOption{
+			chromedp.NoFirstRun,
+			chromedp.NoDefaultBrowserCheck,
+			chromedp.Headless,
+		}...
+	)
 
 	c.ctx, _ = chromedp.NewContext(ctx, browserOptions...)
 

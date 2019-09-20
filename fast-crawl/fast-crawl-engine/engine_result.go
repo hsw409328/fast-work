@@ -13,6 +13,7 @@ import (
 	"github.com/benmanns/goworker"
 	"github.com/hsw409328/gofunc"
 	"log"
+	"strings"
 )
 
 type FastCrawlResultData struct {
@@ -74,6 +75,8 @@ func (c *FastCrawlResult) Save() {
 			//		UrlStr string
 			//		Title string
 			//	}
+			v.BaseDomain = strings.Replace(v.BaseDomain, "http://", "", -1)
+			v.BaseDomain = strings.Replace(v.BaseDomain, "https://", "", -1)
 			redisCmd := fast_driver.RedisDriver.RPush(v.BaseDomain+"-crawl-list-success", string(by))
 			if _, err := redisCmd.Result(); err != nil {
 				fast_log.FastLog.Error(err)

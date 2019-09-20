@@ -8,7 +8,9 @@ package fast_crawl_client
 import (
 	"fast-work/fast-crawl/fast-crawl-engine"
 	"github.com/benmanns/goworker"
+	"log"
 	"testing"
+	"time"
 )
 
 func TestClient_Baidu(t *testing.T) {
@@ -90,7 +92,7 @@ func TestClient_Ability(t *testing.T) {
 			}},
 		},
 	})
-	Client()
+	//Client()
 }
 
 func TestClient_51hsw(t *testing.T) {
@@ -108,4 +110,48 @@ func TestClient_51hsw(t *testing.T) {
 		},
 	})
 	Client()
+}
+
+func TestClient_Coroutine(t *testing.T) {
+	//http://testphp.vulnweb.com/
+	var b chan bool
+	go func() {
+		log.Println("启动1")
+		Client()
+	}()
+	go func() {
+		time.Sleep(time.Second * 5)
+		log.Println("开始执行任务")
+
+		goworker.Enqueue(&goworker.Job{
+			Queue: "crawl",
+			Payload: goworker.Payload{
+				Class: "Crawl",
+				Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
+					BaseDomain:   "http://www.51hsw.com",
+					DomainStr:    "http://www.51hsw.com",
+					MinDeepLevel: 1,
+					MaxDeepLevel: 2,
+				}},
+			},
+		})
+	}()
+	go func() {
+		time.Sleep(time.Second * 15)
+		log.Println("开始执行任务 15秋")
+
+		goworker.Enqueue(&goworker.Job{
+			Queue: "crawl",
+			Payload: goworker.Payload{
+				Class: "Crawl",
+				Args: []interface{}{fast_crawl_engine.FastCrawlEngineParams{
+					BaseDomain:   "http://www.51hsw.com",
+					DomainStr:    "http://www.51hsw.com",
+					MinDeepLevel: 1,
+					MaxDeepLevel: 2,
+				}},
+			},
+		})
+	}()
+	<-b
 }
