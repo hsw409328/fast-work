@@ -25,10 +25,11 @@ fast_crawl_engine.NewFastCrawlEngine(FastCrawlEngineParams{
 #结果
 
 ```
-
-### 下一步版本
+### 新增
 * 爬虫去重，目前只有一层绝对去重，预计采用过滤器的形式
 * 爬虫服务端
+
+### 下一步版本
 * WEB管理平台
 * 爬虫分布式部署
 * ...
