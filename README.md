@@ -26,7 +26,7 @@ fast_crawl_engine.NewFastCrawlEngine(FastCrawlEngineParams{
 
 ```
 ### 新增
-* 爬虫去重，目前只有一层绝对去重，预计采用过滤器的形式
+* 新增过滤器
 * 爬虫服务端
 
 ### 下一步版本
