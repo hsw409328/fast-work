@@ -28,10 +28,12 @@ fast_crawl_engine.NewFastCrawlEngine(FastCrawlEngineParams{
 ### 新增
 * 新增过滤器
 * 爬虫服务端
+* WEB管理平台
 
 ### 下一步版本
-* WEB管理平台
 * 爬虫分布式部署
+* k8s支持
+* 高效缓存实现
 * ...
 
 ### 相关项目
